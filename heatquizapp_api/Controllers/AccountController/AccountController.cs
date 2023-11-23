@@ -27,7 +27,8 @@ namespace heatquizapp_api.Controllers.AccountController
             return View();
         }
 
-        [HttpPost("[action]")]
+        
+        /*[HttpPost("[action]")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginForm VM)
         {
@@ -43,7 +44,7 @@ namespace heatquizapp_api.Controllers.AccountController
             //Create token, and embed roles
 
             return Ok("Test");
-        }
+        }*/
 
         [HttpGet("[action]")]
         [AllowAnonymous]

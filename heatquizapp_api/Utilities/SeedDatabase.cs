@@ -9,6 +9,7 @@ namespace HeatQuizAPI.Services
     {
         void SeedLevelsOfDifficulty();
         void SeedRolesAndFirstUsers();
+        void SeedDatapools();
     }
 
     public class SeedDatabase : ISeedDatabase
@@ -77,6 +78,19 @@ namespace HeatQuizAPI.Services
 
         }
 
+        //Function to seed datapools
+        public void SeedDatapools()
+        {
+            //Easy
+            _context.DataPools.Add(new DataPool()
+            {
+                Name = "Default Datapool",
+                NickName = "Default Datapool",
+                IsHidden = false
+            });
+
+           _context.SaveChangesAsync().Wait();
+        }
 
         //Function to seed levels of difficulty
         public void SeedLevelsOfDifficulty()

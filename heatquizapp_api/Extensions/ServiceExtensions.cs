@@ -3,7 +3,6 @@ using HeatQuizAPI.Models.BaseModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -12,7 +11,7 @@ namespace HeatQuizAPI.Extensions
     public static class ServiceExtensions
     {
         //Must be saved to secure location
-        private readonly static string secretKey = "wysupesseciet_secretopy!123";
+        private readonly static string secretKey = "mysupersecret_secretkey!12345678";
 
         private readonly static SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
 

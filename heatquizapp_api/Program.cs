@@ -70,20 +70,27 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
+//Generate token @login 
+app.UseMiddleware<TokenProviderMiddleware>();
+
 //Datapool accessibility placed after authorization and authentication
 app.UseMiddleware<DatapoolAccessibilityMiddleware>();
 
 app.MapControllers();
 
 //Seed database -- only once
-/*
-var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+/*var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
  
 using (var scope = scopedFactory.CreateScope())
 {
     var service = scope.ServiceProvider.GetService<ISeedDatabase>();
+    
     service.SeedRolesAndFirstUsers();
     service.SeedLevelsOfDifficulty();
+
+    service.SeedDatapools();
+
 }*/
 
 app.Run();
