@@ -3,6 +3,7 @@ using System;
 using HeatQuizAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace heatquizappapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231123164511_DatapoolAccess")]
+    partial class DatapoolAccess
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataPools", (string)null);
+                    b.ToTable("DataPools");
                 });
 
             modelBuilder.Entity("HeatQuizAPI.Models.BaseModels.User", b =>
@@ -147,7 +150,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LevelsOfDifficulty", (string)null);
+                    b.ToTable("LevelsOfDifficulty");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -309,7 +312,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataPoolAccess", (string)null);
+                    b.ToTable("DataPoolAccess");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

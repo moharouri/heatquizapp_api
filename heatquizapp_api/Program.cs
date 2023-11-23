@@ -1,7 +1,10 @@
 using HeatQuizAPI.Extensions;
 using HeatQuizAPI.Mapping;
+using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Services;
+using heatquizapp_api.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +15,9 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 
 builder.Services.ConfigureDatabaseContext();
-builder.Services.ConfigureAuthorization();
+builder.Services.ConfigureAuthenticationAndAuthorization();
+
+builder.Services.AddScoped<UserManager<User>>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -65,8 +70,10 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+//Datapool accessibility placed after authorization and authentication
+app.UseMiddleware<DatapoolAccessibilityMiddleware>();
 
+app.MapControllers();
 
 //Seed database -- only once
 /*

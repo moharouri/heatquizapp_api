@@ -1,17 +1,27 @@
-﻿using HeatQuizAPI.Models.Login;
+﻿using HeatQuizAPI.Models.BaseModels;
+using HeatQuizAPI.Models.Login;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using static HeatQuizAPI.Utilities.Constants;
 
-namespace HeatQuizAPI.Controllers
+namespace heatquizapp_api.Controllers.AccountController
 {
 
     [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [Authorize]
+    [ApiController]
     public class AccountController : Controller
     {
+        public AccountController(
+            
+         ) 
+        {
+            
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -32,8 +42,14 @@ namespace HeatQuizAPI.Controllers
 
             //Create token, and embed roles
 
+            return Ok("Test");
+        }
 
-            //Send response
+        [HttpGet("[action]")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllUsers()
+        {
+           
             return Ok("Test");
         }
     }

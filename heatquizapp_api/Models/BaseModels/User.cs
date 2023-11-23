@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using heatquizapp_api.Models.BaseModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace HeatQuizAPI.Models.BaseModels
 {
@@ -11,5 +12,7 @@ namespace HeatQuizAPI.Models.BaseModels
         public bool Active { get; set; }
 
         public string? ProfilePicture { get; set; }
+
+        public List<DataPoolAccess> PoolAccesses { get; set; } = new List<DataPoolAccess>();
     }
 }

@@ -1,8 +1,6 @@
-﻿using heatquizapp_api.Models.BaseModels;
-
-namespace HeatQuizAPI.Models.BaseModels
+﻿namespace heatquizapp_api.Models.BaseModels
 {
-    public class DataPool
+    public class DataPoolViewModel
     {
         public int Id { get; set; }
 
@@ -13,8 +11,5 @@ namespace HeatQuizAPI.Models.BaseModels
         public string NickName { get; set; }
 
         public bool IsHidden { get; set; }
-
-        public List<DataPoolAccess> PoolAccesses { get; set; } = new List<DataPoolAccess>();
-
     }
 }

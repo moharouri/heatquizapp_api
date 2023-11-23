@@ -47,7 +47,7 @@ namespace HeatQuizAPI.Extensions
         }
 
         //configure authorization
-        public static void ConfigureAuthorization(this IServiceCollection services)
+        public static void ConfigureAuthenticationAndAuthorization(this IServiceCollection services)
         {
             //Get parameters
             var issure = configuration["JwtSettings:Issure"]; 
@@ -115,6 +115,9 @@ namespace HeatQuizAPI.Extensions
                         authBuilder.RequireRole("course_editor");
                     });
             });
+
+            services.AddScoped<UserManager<User>>();
+
         }
 
     }
