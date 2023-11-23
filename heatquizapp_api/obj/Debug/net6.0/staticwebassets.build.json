@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "JZ9M2KEHR5J00qXNjYro8ul5k7cjJ1J5ZZdFmJQ4kRM=",
+  "Source": "heatquizapp_api",
+  "BasePath": "_content/heatquizapp_api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "heatquizapp_api\\wwwroot",
+      "Source": "heatquizapp_api",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}
