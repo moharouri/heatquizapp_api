@@ -25,8 +25,7 @@ namespace heatquizapp_api.Middleware
             {
                 //Logging
                 logger.LogError
-                    (ex,
-                    String.Format("Web API exception @machine {0} @traceId {1}", Environment.MachineName, Activity.Current?.Id));
+                    (ex, $"Web API exception @machine {Environment.MachineName} @traceId {Activity.Current?.Id}");
 
                 //Return the result
                 await Results

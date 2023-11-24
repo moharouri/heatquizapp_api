@@ -109,7 +109,7 @@ namespace heatquizapp_api.Middleware
                     else
                     {
                         //Return not authorized to this datapool
-                        await handleDatapoolNotAuthorized(context, String.Format("User has no access to this datapool {0}", datapool.NickName));
+                        await handleDatapoolNotAuthorized(context, $"User has no access to this datapool {datapool.NickName}");
                         return;
                     }
                 }
