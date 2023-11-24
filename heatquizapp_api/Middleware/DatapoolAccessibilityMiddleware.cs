@@ -34,26 +34,6 @@ namespace heatquizapp_api.Middleware
                 //Check if the request sent by a registered user or a player
                 var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                Console.WriteLine(context.User);
-                Console.WriteLine(userId);
-                Console.WriteLine(context.Request.Headers.Authorization.FirstOrDefault());
-
-                var identity = context.User.Identity as ClaimsIdentity;
-                Console.WriteLine(identity == null);
-                Console.WriteLine(identity.ToString());
-
-                if (identity != null)
-                {
-                    Console.WriteLine(identity.Claims.Count());
-
-                    foreach (var claim in identity.Claims )
-                    {
-                        Console.WriteLine(claim.ValueType);
-                        Console.WriteLine(claim.Value);
-                    }
-
-                }
-
                 var user = await userManager.FindByIdAsync(userId);
 
                 if (user == null)
@@ -64,6 +44,10 @@ namespace heatquizapp_api.Middleware
                 }
                 else
                 {
+                    //Admin user does not need datapool access filtering
+                    var userRoles = await userManager.GetRolesAsync(user);
+                    var isUserAdmin = userRoles.Any(r => r.ToLower() == "admin".ToLower());
+
                     //Get datapool Id from request
                     int datapoolId = 0;
 
@@ -101,7 +85,9 @@ namespace heatquizapp_api.Middleware
                     }
 
                     //Check if datapool exists
-                    var datapool = await _applicationDbContext.DataPools.FirstOrDefaultAsync(dp => dp.Id == datapoolId);
+                    var datapool = await _applicationDbContext.DataPools
+                        .Include(p => p.PoolAccesses)
+                        .FirstOrDefaultAsync(dp => dp.Id == datapoolId);
 
                     if (datapool == null)
                     {
@@ -111,10 +97,10 @@ namespace heatquizapp_api.Middleware
                     }
 
                     //Check if user has datapool access
-                    var hasAccess = true;
+                    var hasAccess = datapool.PoolAccesses.Any(a => a.UserId == user.Id);
 
-                    //Handle 
-                    if (hasAccess)
+                    //Handle  -- admin passes the filtering
+                    if (isUserAdmin || hasAccess)
                     {
                         await _next(context);
                         return;

@@ -59,6 +59,13 @@ namespace heatquizapp_api.Middleware
                     await HandleFailedLogin(context, "User not found");
                     return;
                 }
+
+                //get roles
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                //Check if user is admin
+                var isUserAdmin = userRoles.Any(r => r.ToLower() == "admin".ToLower());
+
                 //Check password is correct
                 var isPasswordValid = await userManager.CheckPasswordAsync(user, password);
 
@@ -84,15 +91,13 @@ namespace heatquizapp_api.Middleware
                 //check user has access to datapool
                 var userHasAccess = datapool.PoolAccesses.Any(a => a.UserId == user.Id);
 
-                /*if (!userHasAccess)
+                //If user is admin -- no datapool access filtering
+                if (!userHasAccess && !isUserAdmin)
                 {
                     //Return user have no access to this datapool
                     await HandleFailedLogin(context, "User has no access to this datapool");
                     return;
-                }*/
-
-                //get roles
-                var userRoles = await userManager.GetRolesAsync(user);
+                }
 
                 //generate token
                 //add claims
@@ -165,9 +170,9 @@ namespace heatquizapp_api.Middleware
 
             public static string Path { get; set; } = "/api/Account/Login";
 
-            public string Issuer { get; set; } = "AltairCA";
+            public string Issuer { get; set; } = "HQAPPWSA";
 
-            public string Audience { get; set; } = "AltairCAAudience";
+            public string Audience { get; set; } = "HeatQuizApplicationWSA";
 
             public TimeSpan Expiration { get; set; } = TimeSpan.FromDays(30);
 

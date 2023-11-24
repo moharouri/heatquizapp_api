@@ -16,7 +16,6 @@ namespace HeatQuizAPI.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         private readonly string _adminPassword = "AdminHeatQuiz1234!";
@@ -25,13 +24,11 @@ namespace HeatQuizAPI.Services
         public SeedDatabase(
             ApplicationDbContext context,
             UserManager<User> userManager,
-            SignInManager<User> signInManager,
             RoleManager<IdentityRole> roleManager
             )
         {
             _context = context;
             _userManager = userManager;
-            _signInManager = signInManager;
             _roleManager = roleManager;
         }
 
@@ -109,7 +106,9 @@ namespace HeatQuizAPI.Services
                 {
                     Name = datapoolName,
                     NickName = datapoolName,
-                    IsHidden = false
+                    IsHidden = false,
+                    DateCreated = DateTime.UtcNow,
+                    DateModified = DateTime.UtcNow,
                 });
 
                 _context.SaveChangesAsync().Wait();
@@ -136,7 +135,7 @@ namespace HeatQuizAPI.Services
                     _context.LevelsOfDifficulty.Add(new LevelOfDifficulty()
                     {
                         Name = name,
-                        HexColor = color
+                        HexColor = color,
                     });
                 }
             }

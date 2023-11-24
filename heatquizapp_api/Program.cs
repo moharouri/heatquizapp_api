@@ -46,6 +46,9 @@ else
 
 app.UseHttpsRedirection();
 
+//Exception handling
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -74,10 +77,9 @@ app.UseAuthorization();
 app.UseMiddleware<TokenProviderMiddleware>();
 
 //Datapool accessibility placed after authorization and authentication
-//app.UseMiddleware<DatapoolAccessibilityMiddleware>();
+app.UseMiddleware<DatapoolAccessibilityMiddleware>();
 
-//Exception handling
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 
 app.MapControllers();
 

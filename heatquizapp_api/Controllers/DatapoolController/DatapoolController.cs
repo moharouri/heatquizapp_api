@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace heatquizapp_api.Controllers.DatapoolController
 {
     [EnableCors("CorsPolicy")]
-    [Route("apidpaware/[controller]")]
+    [Route("api/[controller]")]
     [Authorize]
     [ApiController]
     public class DatapoolController : Controller
@@ -82,8 +82,8 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return Ok();
         }
 
-        [Authorize("admin")]
         [HttpPost("[action]")]
+        [Authorize("admin")]
         public async Task<IActionResult> EditDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -108,6 +108,44 @@ namespace heatquizapp_api.Controllers.DatapoolController
             DP.NickName = VM.NickName;
             DP.IsHidden = VM.IsHidden;
 
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        [Authorize("admin")]
+        public async Task<IActionResult> EditDataPoolAccess([FromBody] UpdateDataPoolAccessViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
+
+            //Check datapool exists
+            var DP = await _applicationDbContext.DataPools
+                .Include(dp => dp.PoolAccesses)
+                .FirstOrDefaultAsync(dp => dp.Id == VM.UpdateDataPoolId);
+
+            if (DP is null)
+                return NotFound("Datapool not found");
+
+            //Get users and check if they exist or repeated
+            var Users = await _applicationDbContext.Users
+                .Where(u => VM.UsersWithAccess.Any(ua => ua == u.Name))
+                .ToListAsync();
+
+            if (Users.Count != VM.UsersWithAccess.Distinct().Count())
+                return BadRequest("Users not found or users repeated");
+
+            //Clear access list and repopulate
+            DP.PoolAccesses.Clear();
+
+            DP.PoolAccesses.AddRange(Users.Select(u => new DataPoolAccess()
+            {
+                DataPoolId = DP.Id,
+                UserId = u.Id,
+            }));
+
+            //Update
             await _applicationDbContext.SaveChangesAsync();
 
             return Ok();
