@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,9 +26,9 @@ namespace heatquizapp_api.Middleware
         }
 
       
-        public async Task InvokeAsync(HttpContext context, UserManager<User> userManager)
+        public async Task InvokeAsync(HttpContext context, UserManager<User> userManager, ILogger<DatapoolAccessibilityMiddleware> logger)
         {
-
+            
             //Check if the request is sent to datapool aware controller
             if (context.Request.Path.StartsWithSegments("/apidpaware"))
             {

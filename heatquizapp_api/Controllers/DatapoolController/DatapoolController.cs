@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
+using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -61,7 +62,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
         public async Task<IActionResult> AddDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
             if(!ModelState.IsValid) 
-                return BadRequest(ModelState);
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check if name or nick name exist already 
             var nameExists = await _applicationDbContext.DataPools
@@ -87,7 +88,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
         public async Task<IActionResult> EditDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid data");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
@@ -118,7 +119,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
         public async Task<IActionResult> EditDataPoolAccess([FromBody] UpdateDataPoolAccessViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid data");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
@@ -156,7 +157,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
         public async Task<IActionResult> HideUnhideDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid data");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
