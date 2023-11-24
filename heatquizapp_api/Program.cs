@@ -74,7 +74,7 @@ app.UseAuthorization();
 app.UseMiddleware<TokenProviderMiddleware>();
 
 //Datapool accessibility placed after authorization and authentication
-app.UseMiddleware<DatapoolAccessibilityMiddleware>();
+//app.UseMiddleware<DatapoolAccessibilityMiddleware>();
 
 app.MapControllers();
 
@@ -88,7 +88,6 @@ using (var scope = scopedFactory.CreateScope())
     
     service.SeedRolesAndFirstUsers();
     service.SeedLevelsOfDifficulty();
-
     service.SeedDatapools();
 
 }*/

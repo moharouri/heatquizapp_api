@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace heatquizapp_api.Controllers.DatapoolController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [Authorize]
     [ApiController]
     public class DatapoolController : Controller

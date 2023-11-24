@@ -16,6 +16,7 @@ namespace HeatQuizAPI.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         private readonly string _adminPassword = "AdminHeatQuiz1234!";
@@ -24,11 +25,13 @@ namespace HeatQuizAPI.Services
         public SeedDatabase(
             ApplicationDbContext context,
             UserManager<User> userManager,
+            SignInManager<User> signInManager,
             RoleManager<IdentityRole> roleManager
             )
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
             _roleManager = roleManager;
         }
 
@@ -39,11 +42,17 @@ namespace HeatQuizAPI.Services
 
             foreach (var role in roles)
             {
-                _roleManager.CreateAsync(new IdentityRole()
+                //Check role already exists
+                var roleExists = _roleManager.RoleExistsAsync(role).Result;
+
+                if (!roleExists)
                 {
-                    Name = role.ToLower(),
-                    NormalizedName = role.ToUpper()
-                }).Wait();
+                    _roleManager.CreateAsync(new IdentityRole()
+                    {
+                        Name = role.ToLower(),
+                        NormalizedName = role.ToUpper()
+                    }).Wait();
+                }
             }
                 
             //Create users 
@@ -68,55 +77,69 @@ namespace HeatQuizAPI.Services
                 ProfilePicture=""
             };
 
-            //Set passwords
-            _userManager.CreateAsync(Admin, _adminPassword).Wait();
-            _userManager.CreateAsync(HQUser, _hquserPassword).Wait();
+            //Check users already exist
+            var adminExists = _userManager.FindByNameAsync("admin").Result != null;
+            var hqUserExists = _userManager.FindByNameAsync("hq_user").Result != null;
 
-            //Add roles
-            _userManager.AddToRoleAsync(Admin, roles[0].ToLower()).Wait();
-            _userManager.AddToRoleAsync(HQUser, roles[1].ToLower()).Wait();
+            //Set users with passwords and roles
+            if (!adminExists)
+            {
+                _userManager.CreateAsync(Admin, _adminPassword).Wait();
+                _userManager.AddToRoleAsync(Admin, roles[0].ToLower()).Wait();
+            }
 
+            if (!hqUserExists)
+            {
+                _userManager.CreateAsync(HQUser, _hquserPassword).Wait();
+                _userManager.AddToRoleAsync(HQUser, roles[1].ToLower()).Wait();
+            }
         }
 
         //Function to seed datapools
         public void SeedDatapools()
         {
-            //Easy
-            _context.DataPools.Add(new DataPool()
-            {
-                Name = "Default Datapool",
-                NickName = "Default Datapool",
-                IsHidden = false
-            });
+            const string datapoolName = "Default Datapool";
 
-           _context.SaveChangesAsync().Wait();
+            //Check datapool already exists
+            var datapoolExists = _context.DataPools.Any(dp => dp.Name == datapoolName || dp.NickName == datapoolName);
+
+            if(!datapoolExists)
+            {
+                _context.DataPools.Add(new DataPool()
+                {
+                    Name = datapoolName,
+                    NickName = datapoolName,
+                    IsHidden = false
+                });
+
+                _context.SaveChangesAsync().Wait();
+            }            
         }
 
         //Function to seed levels of difficulty
         public void SeedLevelsOfDifficulty()
         {
-            //Easy
-            _context.LevelsOfDifficulty.Add(new LevelOfDifficulty()
+            var LODNames = new List<string>() { "Easy", "Medium", "Hard" };
+            var LODColors = new List<string>() { "#417505", "#f8e71c", "#d0021b" };
+
+            for(var i = 0; i< LODNames.Count; i++)
             {
-                Name="Easy",
-                HexColor= "#417505"
-            });
+                var name = LODNames[i];
+                var color = LODColors[i];
 
-            //Medium
-            _context.LevelsOfDifficulty.Add(new LevelOfDifficulty()
-            {
-                Name = "Medium",
-                HexColor = "#f8e71c"
+                //Check lod already exists
+                var LODExists = _context.LevelsOfDifficulty.Any(l => l.Name == name || l.HexColor == color);
 
-            });
-
-            //Hard
-            _context.LevelsOfDifficulty.Add(new LevelOfDifficulty()
-            {
-                Name = "Hard",
-                HexColor = "#d0021b"
-
-            });
+                if (!LODExists)
+                {
+                    //Add lod
+                    _context.LevelsOfDifficulty.Add(new LevelOfDifficulty()
+                    {
+                        Name = name,
+                        HexColor = color
+                    });
+                }
+            }
 
             _context.SaveChangesAsync().Wait();
         }

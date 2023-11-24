@@ -15,36 +15,22 @@ namespace heatquizapp_api.Controllers.AccountController
     [ApiController]
     public class AccountController : Controller
     {
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+
         public AccountController(
-            
+            UserManager<User> userManager,
+            SignInManager<User> signInManager
          ) 
         {
-            
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
         {
             return View();
         }
-
-        
-        /*[HttpPost("[action]")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginForm VM)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(HTTP_REQUEST_INVALID_DATA);
-
-            //Get users
-
-            //Check password
-
-            //Check datapool access
-
-            //Create token, and embed roles
-
-            return Ok("Test");
-        }*/
 
         [HttpGet("[action]")]
         [AllowAnonymous]

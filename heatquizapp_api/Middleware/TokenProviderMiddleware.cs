@@ -29,7 +29,6 @@ namespace heatquizapp_api.Middleware
 
         public Task Invoke(HttpContext context, UserManager<User> userManager)
         {
-            Console.WriteLine(context.Request.Path);
             if (context.Request.Method.Equals("POST") && context.Request.Path.Equals(TokenProviderOptions.Path, StringComparison.Ordinal))
                 return GenerateToken(context, userManager);
 
@@ -41,7 +40,7 @@ namespace heatquizapp_api.Middleware
             var username = "";
             var password = "";
             int? datapoolId = 0;
-            Console.WriteLine("username");
+
             //Try reading username, password, datapool Id
             if (context.Request.HasJsonContentType())
             {
@@ -53,7 +52,7 @@ namespace heatquizapp_api.Middleware
 
                 //Get user
                 var user = await userManager.FindByNameAsync(username);
-                Console.WriteLine("user2");
+
                 if (user == null)
                 {
                     //Return failed to read login data
@@ -85,12 +84,12 @@ namespace heatquizapp_api.Middleware
                 //check user has access to datapool
                 var userHasAccess = datapool.PoolAccesses.Any(a => a.UserId == user.Id);
 
-                if (!userHasAccess)
+                /*if (!userHasAccess)
                 {
                     //Return user have no access to this datapool
                     await HandleFailedLogin(context, "User has no access to this datapool");
                     return;
-                }
+                }*/
 
                 //get roles
                 var userRoles = await userManager.GetRolesAsync(user);

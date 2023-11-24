@@ -27,9 +27,6 @@ namespace heatquizapp_api.Middleware
       
         public async Task InvokeAsync(HttpContext context, UserManager<User> userManager)
         {
-            await _next(context);
-
-            return;
 
             //Check if the request is sent to datapool aware controller
             if (context.Request.Path.StartsWithSegments("/apidpaware"))
@@ -37,13 +34,33 @@ namespace heatquizapp_api.Middleware
                 //Check if the request sent by a registered user or a player
                 var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+                Console.WriteLine(context.User);
+                Console.WriteLine(userId);
+                Console.WriteLine(context.Request.Headers.Authorization.FirstOrDefault());
+
+                var identity = context.User.Identity as ClaimsIdentity;
+                Console.WriteLine(identity == null);
+                Console.WriteLine(identity.ToString());
+
+                if (identity != null)
+                {
+                    Console.WriteLine(identity.Claims.Count());
+
+                    foreach (var claim in identity.Claims )
+                    {
+                        Console.WriteLine(claim.ValueType);
+                        Console.WriteLine(claim.Value);
+                    }
+
+                }
+
                 var user = await userManager.FindByIdAsync(userId);
 
                 if (user == null)
                 {
-
                     //Return not authorized to this datapool
-                    await _next(context);
+                    await handleDatapoolNotAuthorized(context, "Error finding user");
+                    return;
                 }
                 else
                 {
@@ -59,16 +76,17 @@ namespace heatquizapp_api.Middleware
                             try
                             {
                                 datapoolId = requestBody.DatapoolId;
-
-                                Console.WriteLine("datapoolId = " + datapoolId);
                             }
                             catch
                             {
-                                Console.WriteLine("Exception");
+                                await handleDatapoolNotAuthorized(context, "Error reading datapool");
+                                return;
                             }
                         }
                         else
                         {
+                            await handleDatapoolNotAuthorized(context, "Error reading datapool");
+                            return;
                         }
 
                     }
@@ -83,12 +101,13 @@ namespace heatquizapp_api.Middleware
                     }
 
                     //Check if datapool exists
-                    var datapoolExists = await _applicationDbContext.DataPools.AnyAsync(dp => dp.Id == datapoolId);
+                    var datapool = await _applicationDbContext.DataPools.FirstOrDefaultAsync(dp => dp.Id == datapoolId);
 
-                    if (!datapoolExists)
+                    if (datapool == null)
                     {
-                        //Return not authorized to this datapool
-
+                        //Return datapool does not exsit
+                        await handleDatapoolNotAuthorized(context, "Datapool does not exist");
+                        return;
                     }
 
                     //Check if user has datapool access
@@ -98,23 +117,28 @@ namespace heatquizapp_api.Middleware
                     if (hasAccess)
                     {
                         await _next(context);
+                        return;
                     }
                     else
                     {
                         //Return not authorized to this datapool
-
+                        await handleDatapoolNotAuthorized(context, String.Format("User has no access to this datapool {0}", datapool.NickName));
+                        return;
                     }
                 }
             }
             else
             {
                 await _next(context);
+                return;
             }
         }
 
-        private void CreateUserNotDatapoolAuthorizedResponse(HttpContext context)
+        private async Task handleDatapoolNotAuthorized(HttpContext context ,string message)
         {
-
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync(message);
+            return;
         }
 
     }
