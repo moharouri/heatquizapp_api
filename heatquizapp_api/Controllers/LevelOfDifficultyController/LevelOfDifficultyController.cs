@@ -152,7 +152,7 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
             return Ok();
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         public async Task<IActionResult> EditLevel([FromBody] AddEditLevelOfDifficultyViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -191,6 +191,29 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
             Level.Name = VM.Name;
             Level.HexColor = VM.HexColor;
 
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteLevel([FromBody] LevelOfDifficultyViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Model Not Valid");
+
+            //Check level exists
+            var Level = await _applicationDbContext.LevelsOfDifficulty
+                //.Include(l => l.Questions)
+                .FirstOrDefaultAsync(l => l.Id == VM.Id);
+
+            if (Level is null)
+                return NotFound("Not found");
+
+            /*if (Level.Questions.Count != 0)
+                return BadRequest("Level of difficulty has questions assigned to it");*/
+
+            _applicationDbContext.LevelsOfDifficulty.Remove(Level);
             await _applicationDbContext.SaveChangesAsync();
 
             return Ok();

@@ -25,6 +25,8 @@ builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combi
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+builder.Services.ConfigureStatisticsStartDateStorage();
+
 //Seed database -- only once
 //builder.Services.AddScoped<ISeedDatabase, SeedDatabase>();
 

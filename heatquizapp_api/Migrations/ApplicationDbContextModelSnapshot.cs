@@ -36,7 +36,7 @@ namespace heatquizappapi.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool?>("IsHidden")
+                    b.Property<bool>("IsHidden")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
@@ -49,7 +49,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataPools", (string)null);
+                    b.ToTable("DataPools");
                 });
 
             modelBuilder.Entity("HeatQuizAPI.Models.BaseModels.User", b =>
@@ -110,6 +110,9 @@ namespace heatquizappapi.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("StatisticsStartDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -147,7 +150,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LevelsOfDifficulty", (string)null);
+                    b.ToTable("LevelsOfDifficulty");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -309,7 +312,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataPoolAccess", (string)null);
+                    b.ToTable("DataPoolAccess");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -372,7 +375,7 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.HasOne("HeatQuizAPI.Models.BaseModels.User", "User")
-                        .WithMany()
+                        .WithMany("PoolAccesses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -383,6 +386,11 @@ namespace heatquizappapi.Migrations
                 });
 
             modelBuilder.Entity("HeatQuizAPI.Models.BaseModels.DataPool", b =>
+                {
+                    b.Navigation("PoolAccesses");
+                });
+
+            modelBuilder.Entity("HeatQuizAPI.Models.BaseModels.User", b =>
                 {
                     b.Navigation("PoolAccesses");
                 });

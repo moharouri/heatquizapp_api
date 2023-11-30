@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -117,6 +118,12 @@ namespace HeatQuizAPI.Extensions
 
             services.AddScoped<UserManager<User>>();
 
+        }
+
+        //configure Statistics start date storage service
+        public static void ConfigureStatisticsStartDateStorage(this IServiceCollection services)
+        {
+            services.AddTransient<IStatisticsStartDateStorage, StatisticsStartDateStorage>();
         }
 
     }

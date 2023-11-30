@@ -1,5 +1,9 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Models.LevelsOfDifficulty;
+using heatquizapp_api.Models.Courses;
+using heatquizapp_api.Models.Questions;
+using heatquizapp_api.Models.Series;
+using heatquizapp_api.Models.Topics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +19,22 @@ namespace HeatQuizAPI.Database
         public DbSet<DataPool> DataPools { get; set; }
 
         public DbSet<LevelOfDifficulty> LevelsOfDifficulty { get; set; }
+
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<Subtopic> Subtopics { get; set; }
+
+        //Questions
+        public DbSet<QuestionBase> QuestionBase { get; set; }
+
+        //Series
+        public DbSet<QuestionSeries> QuestionSeries { get; set; }
+        public DbSet<QuestionSeriesElement> QuestionSeriesElement { get; set; }
+        public DbSet<QuestionSeriesStatistic> QuestionSeriesStatistic { get; set; }
+
+        //Courses
+        public DbSet<Course> Courses { get; set; }
+
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

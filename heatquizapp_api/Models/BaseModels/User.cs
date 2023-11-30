@@ -14,5 +14,7 @@ namespace HeatQuizAPI.Models.BaseModels
         public string? ProfilePicture { get; set; }
 
         public List<DataPoolAccess> PoolAccesses { get; set; } = new List<DataPoolAccess>();
+
+        public DateTime? StatisticsStartDate { get; set; }
     }
 }

@@ -33,8 +33,8 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return View();
         }
 
-        [Authorize("admin")]
         [HttpGet("[action]")]
+        [Authorize("admin")]
         public async Task<IActionResult> GetDataPoolsAdmin()
         {
             var DPs = await _applicationDbContext.DataPools
@@ -83,7 +83,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return Ok();
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         [Authorize("admin")]
         public async Task<IActionResult> EditDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
@@ -114,7 +114,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return Ok();
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         [Authorize("admin")]
         public async Task<IActionResult> EditDataPoolAccess([FromBody] UpdateDataPoolAccessViewModel VM)
         {
@@ -152,8 +152,8 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return Ok();
         }
 
+        [HttpPut("[action]")]
         [Authorize("admin")]
-        [HttpPost("[action]")]
         public async Task<IActionResult> HideUnhideDataPool([FromBody] AddEditDataPoolViewModel VM)
         {
             if (!ModelState.IsValid)

@@ -1,0 +1,337 @@
+﻿using HeatQuizAPI.Database;
+using heatquizapp_api.Models.BaseModels;
+using heatquizapp_api.Models.Questions;
+using heatquizapp_api.Models.Series;
+using heatquizapp_api.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+
+namespace heatquizapp_api.Controllers.StatisticsController
+{
+    [EnableCors("CorsPolicy")]
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class StatisticsController : Controller
+    {
+        private readonly IStatisticsStartDateStorage _statsStartDateStorage;
+        private readonly ApplicationDbContext _applicationDbContext;
+
+        public StatisticsController(
+            IStatisticsStartDateStorage statsStartDateStorage,
+            ApplicationDbContext applicationDbContext
+         )
+        {
+            _statsStartDateStorage = statsStartDateStorage;
+            _applicationDbContext = applicationDbContext;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet("[action]/{Id}")]
+        public async Task<IActionResult> GetQuestionStatistics(int Id)
+        {
+            var startDate = _statsStartDateStorage.StartDate;
+
+            Expression<Func<QuestionBase, dynamic>> queryExpression;
+
+            if (startDate.HasValue)
+            {
+                queryExpression = q => new {
+                    Id = q.Id,
+
+                    TotalPlay = q.QuestionStatistics.Count(s => s.DateCreated >= startDate),
+                    CorrectPlay = q.QuestionStatistics.Count(s => s.Correct && s.DateCreated >= startDate),
+                    WrongPlay = q.QuestionStatistics.Count(s => !s.Correct && s.DateCreated >= startDate),
+
+                    MedianPlayTime = q.QuestionStatistics.Any(s => s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s =>  s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(s => s.DateCreated >= startDate) / 2].TotalTime : 0,
+
+                    MedianPlayTimeWrong = q.QuestionStatistics.Any(s => !s.Correct) ? q.QuestionStatistics.Where(s => !s.Correct && s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => !a.Correct && a.DateCreated >= startDate) / 2].TotalTime : 0,
+
+                    MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct && s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct && a.DateCreated >= startDate) / 2].TotalTime : 0,
+                };
+            }
+            else
+            {
+                queryExpression = q => new {
+                    Id = q.Id,
+
+                    TotalPlay = q.QuestionStatistics.Count,
+                    CorrectPlay = q.QuestionStatistics.Count(s => s.Correct),
+                    WrongPlay = q.QuestionStatistics.Count(s => !s.Correct),
+
+                    MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count() / 2].TotalTime : 0,
+
+                    MedianPlayTimeWrong = q.QuestionStatistics.Any(s => !s.Correct) ? q.QuestionStatistics.Where(s => !s.Correct).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => !a.Correct) / 2].TotalTime : 0,
+
+                    MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct) / 2].TotalTime : 0,
+                };
+            }
+
+            //Get Question & Stats
+            var Question = await _applicationDbContext.QuestionBase
+                .Include(q => q.QuestionStatistics)
+
+                .Where(q => q.Id == Id)
+
+                .Select(queryExpression)
+                .FirstOrDefaultAsync();
+
+            if (Question is null)
+                return NotFound("Question not found");
+
+            return Ok(Question);
+        }
+
+        [HttpGet("[action]/{Id}")]
+        //Original GetSeriesElementStatistics_EXTENDED
+        public async Task<IActionResult> GetSeriesStatistics(int Id)
+        {
+            var startDate = _statsStartDateStorage.StartDate;
+
+            Expression<Func<QuestionSeries, dynamic>> queryExpression;
+
+            if (startDate == null)
+            {
+                queryExpression = s => new
+                {
+                    Code = s.Code,
+                    Id = s.Id,
+
+                    TotalPlay = s.Statistics.Count,
+                    TotalPlayOnMobile = s.Statistics.Count(a => a.OnMobile),
+
+                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : 0,
+
+                    ElementStats = s.Elements
+                    .OrderBy(e => e.Order)
+                    .Select(e => new
+                    {
+                        Id = e.Id,
+
+                        TotalPlay = e.Question.QuestionStatistics.Count,
+                        TotalSuccessPlay = e.Question.QuestionStatistics.Count(st => st.Correct),
+
+                        MedianPlayTime = e.Question.QuestionStatistics.Any() ? e.Question.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[e.Question.QuestionStatistics.Count() / 2].TotalTime : 0,
+                    })
+
+                };
+            }
+            else
+            {
+                queryExpression = s => new
+                {
+                    Code = s.Code,
+                    Id = s.Id,
+
+                    TotalPlay = s.Statistics.Count,
+                    TotalPlayOnMobile = s.Statistics.Count(a => a.OnMobile),
+
+                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : 0,
+
+                    ElementStats = s.Elements
+                    .OrderBy(e => e.Order)
+                    .Select(e => new
+                    {
+                        Id = e.Id,
+
+                        TotalPlay = e.Question.QuestionStatistics.Count,
+                        TotalSuccessPlay = e.Question.QuestionStatistics.Count(st => st.Correct),
+
+                        MedianPlayTime = e.Question.QuestionStatistics.Any() ? e.Question.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[e.Question.QuestionStatistics.Count() / 2].TotalTime : 0,
+                    })
+
+                };
+            }
+
+            var SeriesStats = await _applicationDbContext.QuestionSeries
+
+                .Include(s => s.Elements)
+                .ThenInclude(e => e.Question)
+                .ThenInclude(q => q.QuestionStatistics)
+
+                .Where(s => s.Id == Id)
+
+                .Select(queryExpression)
+                .FirstOrDefaultAsync();
+
+            return Ok(SeriesStats);
+        }
+
+        [HttpGet("[action]/{Id}")]
+        //Change name in vs code -- original GetQuestionStatisticDetailed
+        public async Task<IActionResult> GetQuestionMedianTimeSpectrum(int Id)
+        {
+            var startDate = _statsStartDateStorage.StartDate;
+
+            Expression<Func<QuestionBase, dynamic>> queryExpression;
+
+            if (startDate == null)
+            {
+                queryExpression = q => new
+                {
+                    Id = q.Id,
+
+                    MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count / 2].TotalTime : 0,
+                    MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct) / 2].TotalTime : 0,
+
+                    AvgPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.Sum(a => a.TotalTime) / q.QuestionStatistics.Count() : '-',
+                    AvgPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct).Sum(a => a.TotalTime) / q.QuestionStatistics.Count(s => s.Correct) : '-',
+                    
+                    TimeSpectrum = q.QuestionStatistics
+                    .GroupBy(a => a.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count()
+                    }),
+
+                    TimeSpectrumCorrect = q.QuestionStatistics
+                    .Where(s => s.Correct)
+                    .GroupBy(a => a.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count()
+                    }),
+
+                    TotalPlay = q.QuestionStatistics.Count,
+                    TotalPlaySuccess = q.QuestionStatistics.Count(a => a.Correct),
+                };
+            }
+            else
+            {
+                queryExpression = q => new
+                {
+                    Id = q.Id,
+
+                    MedianPlayTime = q.QuestionStatistics.Any(s => s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s => s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(s => s.DateCreated >= startDate) / 2].TotalTime : 0,
+                    MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct && s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s => s.Correct && s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct && a.DateCreated >= startDate) / 2].TotalTime : 0,
+
+                    AvgPlayTime = q.QuestionStatistics.Any(s => s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s => s.DateCreated >= startDate).Sum(a => a.TotalTime) / q.QuestionStatistics.Count(s => s.DateCreated >= startDate) : '-',
+                    AvgPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct && s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s => s.Correct && s.DateCreated >= startDate).Sum(a => a.TotalTime) / q.QuestionStatistics.Count(s => s.Correct && s.DateCreated >= startDate) : '-',
+
+                    TimeSpectrum = q.QuestionStatistics
+                    .Where(s => s.DateCreated >= startDate)
+                    .GroupBy(a => a.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count()
+                    }),
+
+                    TimeSpectrumCorrect = q.QuestionStatistics
+                    .Where(s => s.Correct && s.DateCreated >= startDate)
+                    .GroupBy(a => a.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count()
+                    }),
+
+                    TotalPlay = q.QuestionStatistics.Count,
+                    TotalPlaySuccess = q.QuestionStatistics.Count(a => a.Correct),
+                };
+            }
+
+            //Get Question
+            var Data = await _applicationDbContext.QuestionBase
+                .Include(q => q.QuestionStatistics)
+                .Where(q => q.Id == Id)
+                .Select(queryExpression)
+                .FirstOrDefaultAsync();
+
+            if (Data is null)
+                return NotFound("Question not found");
+
+            return Ok(Data);
+        }
+
+        [HttpGet("[action]/{Id}")]
+        //Change name in vs code -- original GetSeriesStatisticDetailed
+        public async Task<IActionResult> GetSeriesMedianTimeSpectrum(int Id)
+        {
+            var startDate = _statsStartDateStorage.StartDate;
+
+            Expression<Func<QuestionSeries, dynamic>> queryExpression;
+
+            if (startDate == null)
+            {
+                queryExpression = s => new
+                {
+                    Id = s.Id,
+
+                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : '-',
+
+                    AvgPlayTime = s.Statistics.Any() ? s.Statistics.Sum(a => a.TotalTime) / s.Statistics.Count : '-',
+
+                    MedianPlayTimeMobile = s.Statistics.Any(s => s.OnMobile) ? s.Statistics.Where(s => s.OnMobile).OrderBy(s => s.TotalTime).Skip(s.Statistics.Where(s => s.OnMobile).Count() / 2).FirstOrDefault().TotalTime : '-',
+
+                    AvgPlayTimeMobile = s.Statistics.Any(s => s.OnMobile) ? s.Statistics.Where(s => s.OnMobile).Sum(a => a.TotalTime) / s.Statistics.Where(s => s.OnMobile).Count() : '-',
+
+
+                    TimeSpectrum = s.Statistics
+                    .GroupBy(a => a.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count(),
+                    }),
+
+
+                    TotalPlay = s.Statistics.Count,
+                    TotalPlayMobile = s.Statistics.Count(s => s.OnMobile)
+                };
+            }
+            else
+            {
+                queryExpression = s => new
+                {
+                    Id = s.Id,
+
+                    MedianPlayTime = s.Statistics.Any(a => a.DateCreated >= startDate) ? s.Statistics.Where(a => a.DateCreated >= startDate).OrderBy(a => a.TotalTime).Skip(s.Statistics.Count(a => a.DateCreated >= startDate) / 2).FirstOrDefault().TotalTime : '-',
+
+                    AvgPlayTime = s.Statistics.Any(a => a.DateCreated >= startDate) ? s.Statistics.Where(a => a.DateCreated >= startDate).Sum(a => a.TotalTime) / s.Statistics.Count(a => a.DateCreated >= startDate) : '-',
+
+                    MedianPlayTimeMobile = s.Statistics.Any(s => s.OnMobile && s.DateCreated >= startDate) ? s.Statistics.Where(s => s.OnMobile && s.DateCreated >= startDate).OrderBy(s => s.TotalTime).Skip(s.Statistics.Count(s => s.OnMobile && s.DateCreated >= startDate) / 2).FirstOrDefault().TotalTime : '-',
+
+                    AvgPlayTimeMobile = s.Statistics.Any(s => s.OnMobile && s.DateCreated >= startDate) ? s.Statistics.Where(s => s.OnMobile).Sum(a => a.TotalTime) / s.Statistics.Count(s => s.OnMobile && s.DateCreated >= startDate) : '-',
+
+
+                    TimeSpectrum = s.Statistics
+                    .Where(s => s.DateCreated >= startDate)
+                    .GroupBy(s => s.TotalTime)
+                    .Select(r => new
+                    {
+                        Time = r.Key,
+                        Count = r.Count(),
+                    }),
+
+
+                    TotalPlay = s.Statistics.Count(s => s.DateCreated >= startDate),
+                    TotalPlayMobile = s.Statistics.Count(s => s.OnMobile && s.DateCreated >= startDate)
+                };
+            }
+
+            //Get Question
+            var Data = await _applicationDbContext.QuestionSeries
+                .Include(s => s.Statistics)
+                .Where(s => s.Id == Id)
+                .Select(queryExpression)
+                .FirstOrDefaultAsync();
+
+            if (Data is null)
+                return NotFound("Series not found");
+
+            return Ok(Data);
+        }
+
+
+    }
+}

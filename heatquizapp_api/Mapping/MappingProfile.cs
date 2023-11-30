@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HeatQuizAPI.Models.BaseModels;
+using HeatQuizAPI.Models.LevelsOfDifficulty;
 using heatquizapp_api.Models.BaseModels;
 
 namespace HeatQuizAPI.Mapping
@@ -17,6 +18,9 @@ namespace HeatQuizAPI.Mapping
             CreateMap<DataPool, DataPoolViewModelAdmin>();
 
             CreateMap<DataPoolAccess, DataPoolAccessViewModel>();
+
+            //Level of difficulty
+            CreateMap<LevelOfDifficulty, LevelOfDifficultyViewModel>(); 
 
         }
     }
