@@ -17,7 +17,7 @@ namespace heatquizapp_api.Utilities
         }
 
         //Validate the extension of a picture file
-        public static async Task<bool> validateImageExtension(IFormFile Picture)
+        public static bool validateImageExtension(IFormFile Picture)
         {
             var validExtenstions = new List<string>() { ".jpg", ".jpeg", ".png", ".gif" };
             var fileExtensionIsValid = validExtenstions.Any(ve => Picture.FileName.EndsWith(ve));
@@ -43,7 +43,7 @@ namespace heatquizapp_api.Utilities
                 await File.CopyToAsync(stream);
             }
 
-            var URL = new string(path.SkipWhile(s => s != 't').Skip(2).ToArray());
+            var URL = new string(path.SkipWhile(s => s != 's').Skip(2).ToArray());
 
             return URL;
         }

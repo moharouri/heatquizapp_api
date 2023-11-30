@@ -1,6 +1,8 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Models.LevelsOfDifficulty;
+using heatquizapp_api.Models.ClickImageTrees;
 using heatquizapp_api.Models.Courses;
+using heatquizapp_api.Models.InterpretedTrees;
 using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.Series;
 using heatquizapp_api.Models.Topics;
@@ -34,11 +36,22 @@ namespace HeatQuizAPI.Database
         //Courses
         public DbSet<Course> Courses { get; set; }
 
+        //Click trees
+        public DbSet<ImageAnswerGroup> ImageAnswerGroups { get; set; }
+        public DbSet<ImageAnswer> ImageAnswers { get; set; }
 
+        //Interpreted trees
+        public DbSet<InterpretedImageGroup> InterpretedImageGroups { get; set; }
+        public DbSet<InterpretedImage> InterpretedImages { get; set; }
+
+        public DbSet<LeftGradientValue> LeftGradientValues { get; set; }
+        public DbSet<RightGradientValue> RightGradientValues { get; set; }
+        public DbSet<RationOfGradientsValue> RationOfGradientsValues { get; set; }
+        public DbSet<JumpValue> JumpValues { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         public ApplicationDbContext()

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace HeatQuizAPI.Extensions
@@ -36,7 +37,6 @@ namespace HeatQuizAPI.Extensions
          services.Configure<IISOptions>(options =>
          {
         });
-
 
         //configure PostgreSQL
         public static void ConfigureDatabaseContext(this IServiceCollection services)

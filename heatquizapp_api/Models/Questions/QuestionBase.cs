@@ -3,10 +3,11 @@ using HeatQuizAPI.Models.LevelsOfDifficulty;
 using heatquizapp_api.Models.StatisticsAndStudentFeedback;
 using heatquizapp_api.Models.Topics;
 using heatquizapp_api.Models.QuestionInformation;
+using heatquizapp_api.Models.Auxillary;
 
 namespace heatquizapp_api.Models.Questions
 {
-    public class QuestionBase : BaseEntity
+    public class QuestionBase : BaseEntity, IImageCarrier, IAddedByCarrier, IPDFCarrier
     {
         public int Type { get; set; }
 

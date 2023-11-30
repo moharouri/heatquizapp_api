@@ -128,5 +128,92 @@ namespace heatquizapp_api.Controllers.AccountController
 
             return Ok();
         }
+
+        [HttpPut("[action]")]
+        //change type 
+        public async Task<IActionResult> EditNameEmail([FromBody] EditUserInfoViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            if (string.IsNullOrEmpty(VM.Name) || string.IsNullOrEmpty(VM.Email))
+                return BadRequest("Please provide a name and an email");
+
+            //Check user exists
+            var User = await _applicationDbContext.Users
+                .FirstOrDefaultAsync(u => u.UserName == VM.Username);
+
+            if (User is null)
+                return NotFound("User not found");
+
+            //Check Name Taken
+            var nameTaken = await _applicationDbContext.Users
+                .AnyAsync(u => u.Name.ToUpper() == VM.Name.ToUpper() && u.UserName.ToUpper() != VM.Username.ToUpper());
+
+            if (nameTaken)
+                return BadRequest("Name alraedy taken");
+
+            User.Name = VM.Name;
+            User.Email = VM.Email;
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+     
+        [HttpPut("[action]")]
+        //Remove Username from website change type 
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile Picture)
+        {
+            var currentUser = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (currentUser == null)
+                return BadRequest("Unable to find user");
+
+            var User = await _applicationDbContext.Users
+                .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+            //Check image provided
+            if (Picture is null)
+                return BadRequest("Please provide picture");
+
+            //Verify extension
+            var isExtensionValid = validateImageExtension(Picture);
+            
+            if (!isExtensionValid)
+                return BadRequest("Picture extenstion not valid");
+
+
+            //Save image and get url
+             var URL = await SaveFile(Picture);
+
+            User.ProfilePicture = URL;
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
+        [HttpPut("[action]")]
+        //Remove Username from website change type 
+        public async Task<IActionResult> RemoveProfilePicture()
+        {
+            var currentUser = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (currentUser == null)
+                return BadRequest("Unable to find user");
+
+            var User = await _applicationDbContext.Users
+                .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+            User.ProfilePicture = null;
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
     }
 }

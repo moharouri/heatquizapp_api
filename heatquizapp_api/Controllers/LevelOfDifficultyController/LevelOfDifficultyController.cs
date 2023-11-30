@@ -43,7 +43,8 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
         [HttpGet("[action]")]
         [Authorize("admin")]
-        public async Task<IActionResult> GetLevelsOfDifficulty_PORTAL_EXTENDED_DETAILS()
+        //change name in vs code original GetLevelsOfDifficulty_PORTAL_EXTENDED_DETAILS
+        public async Task<IActionResult> GetLevelsOfDifficultyDetailed()
         {
             var Levels = await _applicationDbContext.LevelsOfDifficulty
                 .Select(LOD => new
@@ -61,6 +62,7 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
 
         [HttpGet("[action]/{LODId}")]
+        [Authorize("admin")]
         public async Task<IActionResult> GetLevelOfDifficultyQuestions(int LODId)
         {
             /*var level = await _applicationDbContext.LevelsOfDifficulty
@@ -153,6 +155,8 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
         }
 
         [HttpPut("[action]")]
+        [Authorize("admin")]
+        //change type in vs code
         public async Task<IActionResult> EditLevel([FromBody] AddEditLevelOfDifficultyViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -197,6 +201,8 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
         }
 
         [HttpDelete("[action]")]
+        [Authorize("admin")]
+        //change type in vs code
         public async Task<IActionResult> DeleteLevel([FromBody] LevelOfDifficultyViewModel VM)
         {
             if (!ModelState.IsValid)

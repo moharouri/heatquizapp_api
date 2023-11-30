@@ -168,7 +168,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             {
                 Code = VM.Code,
                 Elements = Elements,
-                AddedBy = Adder,
+                AddedById = Adder.Id,
                 IsRandom = VM.IsRandom,
                 RandomSize = VM.RandomSize,
                 DataPoolId = DP.Id,
@@ -436,21 +436,15 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             return Ok();
         }
 
-
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddStatistic(
-            int SeriesId,
-            string Player,
-            string MapKey,
-            string MapName,
-            string MapElementName,
-            string SuccessRate,
-            int TotalTime,
-            bool OnMobile)
+        public async Task<IActionResult> AddStatistic([FromForm] AddSeriesStatisticViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA); 
+
             //Check series exists
-            var Series = await _applicationDbContext.QuestionSeries
-                .FirstOrDefaultAsync(q => q.Id == SeriesId);
+             var Series = await _applicationDbContext.QuestionSeries
+                .FirstOrDefaultAsync(q => q.Id == VM.SeriesId);
 
             if (Series is null)
                 return NotFound("Series not found");
@@ -458,15 +452,15 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             //Add statistic
             Series.Statistics.Add(new QuestionSeriesStatistic()
             {
-                Player = Player,
-                MapKey = MapKey,
-                MapName = MapName,
-                MapElementName = MapElementName,
-                SuccessRate = SuccessRate,
+                Player = VM.Player,
+                MapKey = VM.MapKey,
+                MapName = VM.MapName,
+                MapElementName = VM.MapElementName,
+                SuccessRate = VM.SuccessRate,
 
-                TotalTime = TotalTime,
+                TotalTime = VM.TotalTime,
                 DataPoolId = Series.DataPoolId,
-                OnMobile = OnMobile,
+                OnMobile = VM.OnMobile,
             });
 
             await _applicationDbContext.SaveChangesAsync();

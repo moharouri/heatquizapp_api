@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HeatQuizAPI.Utilities;
 using static heatquizapp_api.Utilities.Utilities;
+using System.Xml.Linq;
 
 namespace heatquizapp_api.Controllers.CourseController
 {
@@ -81,46 +82,46 @@ namespace heatquizapp_api.Controllers.CourseController
 
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddCourseSingleStep(string Name, string Code, IFormFile Picture, int DataPoolId)
+        public async Task<IActionResult> AddCourseSingleStep([FromForm] AddCourseViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check name not null
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(VM.Name))
                 return BadRequest("Name can't be empty");
 
             //Check code not null
-            if (string.IsNullOrEmpty(Code))
+            if (string.IsNullOrEmpty(VM.Code))
                 return BadRequest("Code can't be empty");
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
-               .FirstOrDefaultAsync(dp => dp.Id == DataPoolId);
+               .FirstOrDefaultAsync(dp => dp.Id == VM.DataPoolId);
 
             if (DP is null)
                 return NotFound("Datapool not found");
 
             //Check name not Taken 
             var nameTaken = await _applicationDbContext.Courses
-                .AnyAsync(c => c.Name == Name && c.DataPoolId == DP.Id);
+                .AnyAsync(c => c.Name == VM.Name && c.DataPoolId == DP.Id);
 
             if (nameTaken)
                 return BadRequest("Name taken, choose different name");
 
             //Check code not Taken 
             var codeTaken = await _applicationDbContext.Courses
-                .AnyAsync(c => c.Code == Code);
+                .AnyAsync(c => c.Code == VM.Code);
 
             if (codeTaken)
                 return BadRequest("Code taken, choose different code");
 
             //Check picture
-            if (Picture is null)
+            if (VM.Picture is null)
                 return BadRequest("Please provide a picture");
 
             //Verify Extension
-            var extensionIsValid = await validateImageExtension(Picture);
+            var extensionIsValid = validateImageExtension(VM.Picture);
         
             if (!extensionIsValid)
                 return BadRequest("Picture extenstion not valid");
@@ -131,17 +132,17 @@ namespace heatquizapp_api.Controllers.CourseController
             //Create Course
             var course = new Course()
             {
-                Name = Name,
-                Code = Code,
-                AddedBy = Adder,
+                Name = VM.Name,
+                Code = VM.Code,
+                AddedById = Adder.Id,
                 DataPoolId = DP.Id
             };
 
             //Save picture and url path for it
-            var URL = await SaveFile(Picture);
+            var URL = await SaveFile(VM.Picture);
 
-            course.URL = URL;
-            course.Size = Picture.Length;
+            course.ImageURL = URL;
+            course.Size = VM.Picture.Length;
 
             _applicationDbContext.Courses.Add(course);
             await _applicationDbContext.SaveChangesAsync();
@@ -151,64 +152,67 @@ namespace heatquizapp_api.Controllers.CourseController
 
         [HttpPut("[action]")]
         //Change type on vs code
-        public async Task<IActionResult> EditCourseSingleStep(int CourseId, string Name, string Code, IFormFile Picture, bool SameImage, int DataPoolId)
+        public async Task<IActionResult> EditCourseSingleStep([FromForm] EditCourseViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             //Check Name Not Null
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(VM.Name))
                 return BadRequest("Name can't be empty");
 
-            if (string.IsNullOrEmpty(Code))
+            if (string.IsNullOrEmpty(VM.Code))
                 return BadRequest("Code  can't be empty");
 
             //Check course exists
             var Course = await _applicationDbContext.Courses
-                .FirstOrDefaultAsync(c => c.Id == CourseId);
+                .FirstOrDefaultAsync(c => c.Id == VM.CourseId);
 
             if (Course is null)
                 return NotFound("Course not found");
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
-               .FirstOrDefaultAsync(dp => dp.Id == DataPoolId);
+               .FirstOrDefaultAsync(dp => dp.Id == VM.DataPoolId);
 
             if (DP is null)
                 return NotFound("Datapool not found");
 
             //Check Name/Code Not Taken 
             var nameTaken = await _applicationDbContext.Courses
-                .AnyAsync(c => c.Name == Name && c.Id != CourseId && c.DataPoolId == DP.Id);
+                .AnyAsync(c => c.Name == VM.Name && c.Id != VM.CourseId && c.DataPoolId == DP.Id);
 
             if (nameTaken)
                 return BadRequest("Name taken, choose different name");
 
             var codeTaken = await _applicationDbContext.Courses
-                .AnyAsync(c => c.Code == Code && c.Id != CourseId && c.DataPoolId == DP.Id);
+                .AnyAsync(c => c.Code == VM.Code && c.Id != VM.CourseId && c.DataPoolId == DP.Id);
 
             if (codeTaken)
                 return BadRequest("Code taken, choose different code");
 
             //Edit Course Name
-            Course.Name = Name;
-            Course.Code = Code;
+            Course.Name = VM.Name;
+            Course.Code = VM.Code;
 
-            if (!SameImage)
+            if (!VM.SameImage)
             {
 
                 //Check Picture
-                if (Picture is null)
+                if (VM.Picture is null)
                     return BadRequest("Please provide a picture");
 
                 //Verify Extension
-                var extensionIsValid = await validateImageExtension(Picture);
+                var extensionIsValid = validateImageExtension(VM.Picture);
 
                 if (!extensionIsValid)
                     return BadRequest("Picture extenstion not valid");
 
                 //Save picture and url path for it
-                var URL = await SaveFile(Picture);
+                var URL = await SaveFile(VM.Picture);
 
-                Course.URL = URL;
-                Course.Size = Picture.Length;
+                Course.ImageURL = URL;
+                Course.Size = VM.Picture.Length;
             }
 
             await _applicationDbContext.SaveChangesAsync();

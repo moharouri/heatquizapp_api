@@ -1,4 +1,5 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Auxillary;
 
 namespace heatquizapp_api.Models.Courses
 {
@@ -9,7 +10,7 @@ namespace heatquizapp_api.Models.Courses
         public string Code { get; set; }
 
         //Thumbnail
-        public string URL { get; set; }
+        public string ImageURL { get; set; }
 
         public long Size { get; set; }
 

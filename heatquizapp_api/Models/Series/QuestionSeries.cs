@@ -1,8 +1,9 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Auxillary;
 
 namespace heatquizapp_api.Models.Series
 {
-    public class QuestionSeries : BaseEntity
+    public class QuestionSeries : BaseEntity, IAddedByCarrier
     {
         public string Code { get; set; }
 

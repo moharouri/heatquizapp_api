@@ -6,6 +6,7 @@ using heatquizapp_api.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,15 @@ builder.Services.ConfigureStatisticsStartDateStorage();
 //Seed database -- only once
 //builder.Services.AddScoped<ISeedDatabase, SeedDatabase>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+//Setup JSON serializer
+.AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+
+});
 
 //------------------//
 

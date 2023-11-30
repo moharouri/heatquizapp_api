@@ -66,3 +66,6 @@ C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\Sys
 C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\System.Text.Json.dll
 C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
 C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Users\mmo19\source\repos\heatquizapp_api\heatquizapp_api\bin\Debug\net6.0\Newtonsoft.Json.Bson.dll

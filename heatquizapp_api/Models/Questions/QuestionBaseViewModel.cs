@@ -13,7 +13,7 @@ namespace heatquizapp_api.Models.Questions
         public string Code { get; set; }
 
         //Added By
-        public User AddedBy { get; set; }
+        public string AddedByName { get; set; }
         public string AddedById { get; set; }
 
 

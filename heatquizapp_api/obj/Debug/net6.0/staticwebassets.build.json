@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "JZ9M2KEHR5J00qXNjYro8ul5k7cjJ1J5ZZdFmJQ4kRM=",
+  "Hash": "auxSuL+znVHtVlpmxyuFgOXeQaPAF99JwEEIXKl8I7E=",
   "Source": "heatquizapp_api",
   "BasePath": "_content/heatquizapp_api",
   "Mode": "Default",
@@ -15,5 +15,40 @@
       "Pattern": "**"
     }
   ],
-  "Assets": []
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\aluvri5z.khc.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/aluvri5z.khc.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\aluvri5z.khc.png"
+    },
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\pmoyxgec.qyf.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/pmoyxgec.qyf.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\pmoyxgec.qyf.png"
+    }
+  ]
 }
