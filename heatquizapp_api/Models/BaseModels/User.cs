@@ -16,5 +16,13 @@ namespace HeatQuizAPI.Models.BaseModels
         public List<DataPoolAccess> PoolAccesses { get; set; } = new List<DataPoolAccess>();
 
         public DateTime? StatisticsStartDate { get; set; }
+        public bool SaveStatistics{ get; set; }
+
+        //Linked keys
+        public List<UserLinkedPlayerKey> LinkedKeys = new List<UserLinkedPlayerKey>();
+
+        //Notification subsription
+        public List<DatapoolNotificationSubscription> notificationSubscriptions = new List<DatapoolNotificationSubscription>();
+
     }
 }

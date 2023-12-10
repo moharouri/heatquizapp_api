@@ -38,6 +38,7 @@ namespace heatquizapp_api.Controllers.TopicController
             _contextAccessor = contextAccessor;
             _userManager = userManager;
         }
+
         public IActionResult Index()
         {
             return View();

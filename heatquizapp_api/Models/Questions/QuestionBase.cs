@@ -4,6 +4,7 @@ using heatquizapp_api.Models.StatisticsAndStudentFeedback;
 using heatquizapp_api.Models.Topics;
 using heatquizapp_api.Models.QuestionInformation;
 using heatquizapp_api.Models.Auxillary;
+using heatquizapp_api.Models.Series;
 
 namespace heatquizapp_api.Models.Questions
 {
@@ -33,6 +34,9 @@ namespace heatquizapp_api.Models.Questions
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
 
+        //Latex
+        public string? Latex { get; set; }
+
         //PDF Solution
         public string? PDFURL { get; set; }
         public long? PDFSize { get; set; }
@@ -41,10 +45,17 @@ namespace heatquizapp_api.Models.Questions
         public Information Information { get; set; }
         public int? InformationId { get; set; }
 
+        //Series relations
+        public List<QuestionSeriesElement> SeriesElements { get; set; } = new List<QuestionSeriesElement>();
+
         //Statistics
         public List<QuestionStatistic> QuestionStatistics { get; set; } = new List<QuestionStatistic>();
         public List<QuestionPDFStatistic> QuestionPDFStatistics { get; set; } = new List<QuestionPDFStatistic>();
         public List<QuestionStudentFeedback> StudentFeedback { get; set; } = new List<QuestionStudentFeedback>();
+
+        //Comments
+        public QuestionCommentSection CommentSection { get; set; }
+        public int? CommentSectionId { get; set; }
 
 
     }

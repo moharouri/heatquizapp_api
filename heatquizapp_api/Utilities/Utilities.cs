@@ -1,4 +1,5 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Keyboard;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -28,6 +29,18 @@ namespace heatquizapp_api.Utilities
             return true;
         }
 
+        //Validate the extension of a PDF file
+        public static bool validatePDFExtension(IFormFile PDF)
+        {
+            var validExtenstions = new List<string>() { ".pdf"};
+            var fileExtensionIsValid = validExtenstions.Any(ve => PDF.FileName.EndsWith(ve));
+
+            if (!fileExtensionIsValid)
+                return false;
+
+            return true;
+        }
+
         //Save a file to local storage
         public async static Task<string> SaveFile(IFormFile File)
         {
@@ -37,7 +50,7 @@ namespace heatquizapp_api.Utilities
 
             var path = Path.Combine("wwwroot/Files", fileName + FileExtension);
 
-            //Save File
+            //Save file
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await File.CopyToAsync(stream);
@@ -46,6 +59,110 @@ namespace heatquizapp_api.Utilities
             var URL = new string(path.SkipWhile(s => s != 's').Skip(2).ToArray());
 
             return URL;
+        }
+
+        //Copy a file from a source path
+        public async static Task<string> CopyFile(string sourcePath)
+        {
+            //Get random file name
+            var FileExtension = Path.GetExtension(sourcePath);
+            var fileName = Path.GetRandomFileName();
+
+            //Add file to path
+            var path = Path.Combine("wwwroot/Files", fileName + FileExtension);
+
+            //Save file
+            using (Stream source = File.Open(sourcePath, FileMode.Open))
+            {
+                using (Stream destination = File.Create(path))
+                {
+                    await source.CopyToAsync(destination);
+                }
+            }
+
+            var URL = new string(path.SkipWhile(s => s != 's').Skip(2).ToArray());
+
+            return URL;
+        }
+
+        //Remove a file from a source path
+        public static bool RemoveFile(string sourcePath)
+        { 
+            //Get path
+            var path = Path.Combine("wwwroot", sourcePath);
+
+            if (File.Exists(path))
+            {
+                try
+                {
+                    File.Delete(path);
+                    return true;
+                }
+                catch {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static List<string> GetKeyboardReplacementChars()
+        {
+            List<char> array = new List<char>("ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray());
+            array.AddRange("ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToLower().ToCharArray());
+
+            var charArray1 = new List<string>();
+
+            foreach (var c in array)
+            {
+                charArray1.Add(new string(c, 1));
+            }
+
+
+            var charArray2 = new List<string>();
+
+            foreach (var s in charArray1)
+            {
+                foreach (var ss in charArray1)
+                {
+                    charArray2.Add(s + ss);
+                }
+            }
+
+            return charArray2;
+        }
+
+        public static string? GetUniqueKeyboardReplacementChar(Keyboard keyboard)
+        {
+            List<char> array = new List<char>("ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray());
+            array.AddRange("ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToLower().ToCharArray());
+
+            var charArray1 = new List<string>();
+
+            foreach (var c in array)
+            {
+                charArray1.Add(new string(c, 1));
+            }
+
+
+            var charArray2 = new List<string>();
+
+            foreach (var s in charArray1)
+            {
+                foreach (var ss in charArray1)
+                {
+                    charArray2.Add(s + ss);
+                }
+            }
+
+            var finalChar = charArray2
+            .Where(c => 
+            !keyboard.NumericKeys.Any(k => k.KeySimpleForm == c) 
+            && 
+            !keyboard.VariableKeyImages.Any(k => k.ReplacementCharacter == c))
+            .FirstOrDefault();
+
+            return finalChar;
         }
     }
 }

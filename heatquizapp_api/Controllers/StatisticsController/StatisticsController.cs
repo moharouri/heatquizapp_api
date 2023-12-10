@@ -1,7 +1,10 @@
 ﻿using HeatQuizAPI.Database;
+using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.BaseModels;
+using heatquizapp_api.Models.Courses;
 using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.Series;
+using heatquizapp_api.Models.StatisticsAndStudentFeedback;
 using heatquizapp_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -34,9 +37,13 @@ namespace heatquizapp_api.Controllers.StatisticsController
             return View();
         }
 
-        [HttpGet("[action]/{Id}")]
-        public async Task<IActionResult> GetQuestionStatistics(int Id)
+        [HttpPost("[action]")]
+        //Change type and location
+        public async Task<IActionResult> GetQuestionStatistics([FromBody] QuestionBaseViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var startDate = _statsStartDateStorage.StartDate;
 
             Expression<Func<QuestionBase, dynamic>> queryExpression;
@@ -78,7 +85,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
             var Question = await _applicationDbContext.QuestionBase
                 .Include(q => q.QuestionStatistics)
 
-                .Where(q => q.Id == Id)
+                .Where(q => q.Id == VM.Id)
 
                 .Select(queryExpression)
                 .FirstOrDefaultAsync();
@@ -89,10 +96,13 @@ namespace heatquizapp_api.Controllers.StatisticsController
             return Ok(Question);
         }
 
-        [HttpGet("[action]/{Id}")]
+        [HttpPost("[action]")]
         //Original GetSeriesElementStatistics_EXTENDED
-        public async Task<IActionResult> GetSeriesStatistics(int Id)
+        public async Task<IActionResult> GetSeriesStatistics([FromBody] QuestionSeriesViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var startDate = _statsStartDateStorage.StartDate;
 
             Expression<Func<QuestionSeries, dynamic>> queryExpression;
@@ -156,7 +166,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
                 .ThenInclude(e => e.Question)
                 .ThenInclude(q => q.QuestionStatistics)
 
-                .Where(s => s.Id == Id)
+                .Where(s => s.Id == VM.Id)
 
                 .Select(queryExpression)
                 .FirstOrDefaultAsync();
@@ -164,10 +174,13 @@ namespace heatquizapp_api.Controllers.StatisticsController
             return Ok(SeriesStats);
         }
 
-        [HttpGet("[action]/{Id}")]
+        [HttpPost("[action]")]
         //Change name in vs code -- original GetQuestionStatisticDetailed
-        public async Task<IActionResult> GetQuestionMedianTimeSpectrum(int Id)
+        public async Task<IActionResult> GetQuestionMedianTimeSpectrum([FromBody] QuestionBaseViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var startDate = _statsStartDateStorage.StartDate;
 
             Expression<Func<QuestionBase, dynamic>> queryExpression;
@@ -243,7 +256,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
             //Get Question
             var Data = await _applicationDbContext.QuestionBase
                 .Include(q => q.QuestionStatistics)
-                .Where(q => q.Id == Id)
+                .Where(q => q.Id == VM.Id)
                 .Select(queryExpression)
                 .FirstOrDefaultAsync();
 
@@ -253,10 +266,13 @@ namespace heatquizapp_api.Controllers.StatisticsController
             return Ok(Data);
         }
 
-        [HttpGet("[action]/{Id}")]
+        [HttpPost("[action]")]
         //Change name in vs code -- original GetSeriesStatisticDetailed
-        public async Task<IActionResult> GetSeriesMedianTimeSpectrum(int Id)
+        public async Task<IActionResult> GetSeriesMedianTimeSpectrum([FromBody] QuestionSeriesViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var startDate = _statsStartDateStorage.StartDate;
 
             Expression<Func<QuestionSeries, dynamic>> queryExpression;
@@ -322,7 +338,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
             //Get Question
             var Data = await _applicationDbContext.QuestionSeries
                 .Include(s => s.Statistics)
-                .Where(s => s.Id == Id)
+                .Where(s => s.Id == VM.Id)
                 .Select(queryExpression)
                 .FirstOrDefaultAsync();
 
@@ -332,6 +348,38 @@ namespace heatquizapp_api.Controllers.StatisticsController
             return Ok(Data);
         }
 
+        [HttpPost("[action]")]
+        //change type, name and position original: GetCourseMapStatisticsById_PORTAL
+        public async Task<IActionResult> GetCourseMapStatisticsById([FromBody] CourseMapViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var Stats = await _applicationDbContext.CourseMap
+
+                .Select(c => new
+                {
+                    Id = c.Id,
+                    Elements = c.Elements.Select(e => new {
+                        Id = e.Id,
+                        PDFStatisticsCount = e.PDFStatistics.Count,
+                        PDFStatisticsCountOnMobile = e.PDFStatistics.Count(s => s.OnMobile),
+
+                        SeriesPlayCount = e.QuestionSeries != null ? e.QuestionSeries.Statistics.Count : 0,
+                        SeriesPlayCountOnMobile = e.QuestionSeries != null ?
+                         e.QuestionSeries.Statistics.Count(s => s.OnMobile) : 0,
+
+                        SeriesPlayMedianTime = e.QuestionSeries != null ?
+                        e.QuestionSeries.Statistics.OrderBy(a => a.TotalTime).Skip(e.QuestionSeries.Statistics.Count() / 2).FirstOrDefault().TotalTime : 0,
+                    }).ToList()
+                })
+               .FirstOrDefaultAsync(c => c.Id == VM.Id);
+
+            if (Stats is null)
+                return NotFound("Map not found");
+
+            return Ok(Stats);
+        }
 
     }
 }

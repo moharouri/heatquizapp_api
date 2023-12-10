@@ -17,6 +17,6 @@ namespace heatquizapp_api.Models.Courses
         public User AddedBy { get; set; }
         public string AddedById { get; set; }
 
-        //public List<CourseMap> CourseMaps { get; set; } = new List<CourseMap>();
+        public List<CourseMap> CourseMaps { get; set; } = new List<CourseMap>();
     }
 }

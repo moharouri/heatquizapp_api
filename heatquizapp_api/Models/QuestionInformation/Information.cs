@@ -1,9 +1,10 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Auxillary;
 using heatquizapp_api.Models.Questions;
 
 namespace heatquizapp_api.Models.QuestionInformation
 {
-    public class Information
+    public class Information : IAddedByCarrier
     {
         public int Id { get; set; }
 

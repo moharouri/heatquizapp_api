@@ -7,5 +7,7 @@
         public List<CodeNumberViewModel> Codes { get; set; } = new List<CodeNumberViewModel>();
         public int NumberOfObjects { get; set; }
         public List<int> ObjectsIds { get; set; } = new List<int>();
+
+        public int? Type {  get; set; }
     }
 }

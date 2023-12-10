@@ -71,7 +71,7 @@ namespace heatquizapp_api.Controllers.CourseController
         {
             var Course = await _applicationDbContext.Courses
                 .Include(c => c.AddedBy)
-                //.Include(c => c.CourseMaps)
+                .Include(c => c.CourseMaps)
                 .FirstOrDefaultAsync(c => c.Id == Id);
 
             if (Course is null)

@@ -1,7 +1,17 @@
-﻿namespace heatquizapp_api.Models.QuestionInformation
+﻿using HeatQuizAPI.Models.BaseModels;
+
+namespace heatquizapp_api.Models.QuestionInformation
 {
-    public class InformationViewModel
+    public class InformationViewModel 
     {
+        public int Id { get; set; }
+
+        public DateTime? DateCreated { get; set; }
+        public DateTime? DateModified { get; set; }
+
+        public DataPool DataPool { get; set; }
+        public int DataPoolId { get; set; }
+
         public string AddedByName { get; set; }
 
         public string Code { get; set; }

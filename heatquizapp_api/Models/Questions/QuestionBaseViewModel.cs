@@ -32,6 +32,9 @@ namespace heatquizapp_api.Models.Questions
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
 
+        //Latex
+        public string? Latex { get; set; }
+
         //PDF Solution
         public string? PDFURL { get; set; }
         public long? PDFSize { get; set; }

@@ -5,8 +5,10 @@ using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static heatquizapp_api.Utilities.Utilities;
 
 namespace heatquizapp_api.Controllers.DatapoolController
 {
@@ -19,13 +21,20 @@ namespace heatquizapp_api.Controllers.DatapoolController
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly IMapper _mapper;
 
-        public DatapoolController(
-            ApplicationDbContext applicationDbContext,
-            IMapper mapper)
-        {
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly UserManager<User> _userManager;
 
-            _mapper = mapper;
+        public DatapoolController(
+                ApplicationDbContext applicationDbContext,
+                IMapper mapper,
+                IHttpContextAccessor contextAccessor,
+                UserManager<User> userManager
+            )
+        {
             _applicationDbContext = applicationDbContext;
+            _mapper = mapper;
+            _contextAccessor = contextAccessor;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -174,6 +183,115 @@ namespace heatquizapp_api.Controllers.DatapoolController
             return Ok();
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserNotificationSubscriptions()
+        {
+            var user = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (user is null)
+                return BadRequest("User not found");
+
+            var subscriptions = await _applicationDbContext.DatapoolNotificationSubscriptions
+                .Include(a => a.Datapool)
+                .Include(a => a.User)
+                .Where(a => a.UserId == user.Id)
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<DatapoolNotificationSubscriptionViewModel>>(subscriptions));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> SubscribeNotifications([FromForm] DatapoolCarrierViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var datapool = await _applicationDbContext.DataPools
+                .Include(dp => dp.PoolAccesses)
+                .FirstOrDefaultAsync(a => a.Id == VM.DatapoolId);
+
+            if (datapool is null)
+                return NotFound("Datapool not found");
+
+            var user = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (user is null)
+                return BadRequest("User not found");
+
+            if (!datapool.PoolAccesses.Any(a => a.UserId == user.Id))
+                return BadRequest("Not authorized to this datapool");
+
+            var subscription = await _applicationDbContext.DatapoolNotificationSubscriptions
+                .FirstOrDefaultAsync(a => a.DatapoolId == datapool.Id && a.UserId == user.Id);
+
+            if (subscription != null)
+                return BadRequest("Already subscribed");
+
+            var newSubscription = new DatapoolNotificationSubscription()
+            {
+                DatapoolId = datapool.Id,
+                UserId = user.Id,
+                LastSeen = DateTime.Now
+            };
+
+            _applicationDbContext.DatapoolNotificationSubscriptions.Add(newSubscription);
+
+            await _applicationDbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UnsubscribeNotifications([FromForm] DatapoolCarrierViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var datapool = await _applicationDbContext.DataPools
+                .FirstOrDefaultAsync(a => a.Id == VM.DatapoolId);
+
+            if (datapool is null)
+                return NotFound("Datapool not found");
+
+            var user = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (user is null)
+                return BadRequest("User not found");
+
+
+            var subscription = await _applicationDbContext.DatapoolNotificationSubscriptions
+                .FirstOrDefaultAsync(a => a.DatapoolId == datapool.Id && a.UserId == user.Id);
+
+            if (subscription is null)
+                return BadRequest("Not subscribed");
+
+            _applicationDbContext.DatapoolNotificationSubscriptions.Remove(subscription);
+
+            await _applicationDbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> RegisterSeenNotifications()
+        {
+            var user = await getCurrentUser(_contextAccessor, _userManager);
+
+            if (user is null)
+                return BadRequest("User not found");
+
+            //Update last seen in notifications subscribers
+            var notificationSubscribtions = await _applicationDbContext.DatapoolNotificationSubscriptions
+                .Where(a => a.UserId == user.Id)
+                .ToListAsync();
+
+            foreach (var ns in notificationSubscribtions)
+            {
+                ns.LastSeen = DateTime.Now;
+            }
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
 
     }
 }

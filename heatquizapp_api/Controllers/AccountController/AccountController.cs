@@ -46,7 +46,6 @@ namespace heatquizapp_api.Controllers.AccountController
         }
 
         [HttpGet("[action]")]
-        [Authorize("admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var currentUser = await getCurrentUser(_contextAccessor, _userManager);
@@ -63,6 +62,7 @@ namespace heatquizapp_api.Controllers.AccountController
         }
 
         [HttpGet("[action]")]
+        [Authorize("admin")]
         public async Task<IActionResult> GetAllUsersAdmin()
         {
             var users = await _applicationDbContext.Users.ToListAsync();
