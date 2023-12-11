@@ -1,4 +1,5 @@
 ﻿using HeatQuizAPI.Database;
+using HeatQuizAPI.Mapping;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.BaseModels;
@@ -43,6 +44,23 @@ namespace heatquizapp_api.Controllers.AccountController
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> CheckUserToken()
+        {
+            var currentUser = await getCurrentUser(_contextAccessor, _userManager);
+
+            var Roles = await _userManager.GetRolesAsync(currentUser);
+
+            return Ok(new
+            {
+                username = currentUser.UserName,
+                name = currentUser.Name,
+                userProfile = !string.IsNullOrEmpty(currentUser.ProfilePicture)
+                ? MappingProfile.FILES_PATH + currentUser.ProfilePicture : null,
+                roles = Roles
+            });
         }
 
         [HttpGet("[action]")]

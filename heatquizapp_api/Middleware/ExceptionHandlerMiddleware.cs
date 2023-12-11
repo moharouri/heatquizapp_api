@@ -27,19 +27,8 @@ namespace heatquizapp_api.Middleware
                 logger.LogError
                     (ex, $"Web API exception @machine {Environment.MachineName} @traceId {Activity.Current?.Id}");
 
-                //Return the result
-                await Results
-                 .Problem(
-                    title: "Server error - please try again later",
-
-                    statusCode: StatusCodes.Status500InternalServerError,
-
-                    extensions: new Dictionary<string, object?>()
-                    {
-                        {"traceId", Activity.Current?.Id}
-                    }
-                 )
-                 .ExecuteAsync(context);
+                //Return an error message
+                await Results.BadRequest("Server error - please try again later").ExecuteAsync(context);
             }
         }
     }
