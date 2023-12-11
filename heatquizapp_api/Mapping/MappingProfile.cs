@@ -80,13 +80,18 @@ namespace HeatQuizAPI.Mapping
             CreateMap<QuestionSeries, QuestionSeriesViewModel>()
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
 
+            CreateMap<QuestionSeriesElement, QuestionSeriesElementViewModel>();
             //Keyboard
             CreateMap<Keyboard, KeyboardViewModel>()
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
 
             CreateMap<KeyboardNumericKey, KeyboardNumericKeyViewModel>();
+            CreateMap < KeyboardNumericKeyRelation, KeyboardNumericKeyRelationViewModel > ();
+
             CreateMap<KeyboardVariableKey, KeyboardVariableKeyViewModel>();
-            CreateMap<KeyboardVariableKey, KeyboardVariableKeyVariationViewModel>();
+            CreateMap<KeyboardVariableKeyVariation, KeyboardVariableKeyVariationViewModel>();
+            CreateMap<KeyboardVariableKeyRelation, KeyboardVariableKeyRelationViewModel>(); 
+            CreateMap<KeyboardVariableKeyImageRelation, KeyboardVariableKeyImageRelationViewModel>(); 
 
             CreateMap<KeysList, KeysListViewModel>()
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
