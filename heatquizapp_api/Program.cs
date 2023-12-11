@@ -52,10 +52,11 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    //HTTPS redirection in a production environment
+    app.UseHttpsRedirection();
+
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 
 //Exception handling
 app.UseMiddleware<ExceptionHandlerMiddleware>();

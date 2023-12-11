@@ -18,6 +18,7 @@ namespace HeatQuizAPI.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
+        //Please change later
         private readonly string _adminPassword = "AdminHeatQuiz1234!";
         private readonly string _hquserPassword = "EditorHeatQuiz1234!";
 
