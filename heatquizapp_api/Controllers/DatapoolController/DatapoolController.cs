@@ -56,6 +56,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
         }
 
         [HttpGet("[action]")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDataPools()
         {
             var DPs = await _applicationDbContext.DataPools
