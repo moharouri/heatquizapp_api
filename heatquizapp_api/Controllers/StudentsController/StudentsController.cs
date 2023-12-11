@@ -15,6 +15,7 @@ using HeatQuizAPI.Models.BaseModels;
 using Microsoft.AspNetCore.Identity;
 using static heatquizapp_api.Utilities.Utilities;
 using heatquizapp_api.Models.BaseModels;
+using heatquizapp_api.Models.Series;
 
 namespace heatquizapp_api.Controllers.StudentsController
 {
@@ -155,6 +156,26 @@ namespace heatquizapp_api.Controllers.StudentsController
             return Ok(_mapper.Map<MultipleChoiceQuestion, MultipleChoiceQuestionViewModel>(Question));
         }
 
+        [HttpGet("[action]/{Code}")]
+        public async Task<IActionResult> GetSeriesPlayByCode(string Code)
+        {
+            var Series = await _applicationDbContext.QuestionSeries
+
+                .Include(s => s.Elements)
+                .ThenInclude(e => e.Question)
+                .ThenInclude(q => q.Information)
+
+                .FirstOrDefaultAsync(s => s.Code == Code);
+
+            if (Series is null)
+                return NotFound("Series not found");
+
+            //Send elements in order
+            Series.Elements = Series.Elements.OrderBy(e => e.Order).ToList();
+
+            return Ok(_mapper.Map<QuestionSeries, QuestionSeriesViewModel>(Series));
+        }
+
         [HttpGet("[action]/{Id}")]
         public async Task<IActionResult> GetCourseMapPlayById(int Id)
         {
@@ -274,6 +295,39 @@ namespace heatquizapp_api.Controllers.StudentsController
                 Player = VM.Player,
                 Correct = VM.Correct,
 
+            });
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        //Change position controller-wise
+        public async Task<IActionResult> AddStatistic([FromForm] AddSeriesStatisticViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            //Check series exists
+            var Series = await _applicationDbContext.QuestionSeries
+               .FirstOrDefaultAsync(q => q.Id == VM.SeriesId);
+
+            if (Series is null)
+                return NotFound("Series not found");
+
+            //Add statistic
+            Series.Statistics.Add(new QuestionSeriesStatistic()
+            {
+                Player = VM.Player,
+                MapKey = VM.MapKey,
+                MapName = VM.MapName,
+                MapElementName = VM.MapElementName,
+                SuccessRate = VM.SuccessRate,
+
+                TotalTime = VM.TotalTime,
+                DataPoolId = Series.DataPoolId,
+                OnMobile = VM.OnMobile,
             });
 
             await _applicationDbContext.SaveChangesAsync();

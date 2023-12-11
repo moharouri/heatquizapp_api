@@ -12,10 +12,11 @@ namespace heatquizapp_api.Models.Courses
         //Thumbnail
         public string ImageURL { get; set; }
 
-        public long Size { get; set; }
+        public long ImageSize { get; set; }
 
         public string AddedByName { get; set; }
 
-        //public List<CourseMapViewModel> CourseMaps { get; set; } = new List<CourseMapViewModel>();
+        //Maps
+        public List<CourseMapViewModel> CourseMaps { get; set; } = new List<CourseMapViewModel>();
     }
 }

@@ -8,7 +8,6 @@ namespace heatquizapp_api.Models.Courses
         public CourseMapBadgeSystem System { get; set; }
         public int SystemId { get; set; }
         
-        //Was URL
         public string ImageURL { get; set; }
         public long ImageSize { get; set; }
 

@@ -12,8 +12,6 @@ namespace heatquizapp_api.Models.Series
 
         public List<QuestionSeriesElementViewModel> Elements { get; set; } = new List<QuestionSeriesElementViewModel>();
 
-        //public List<CourseMapElement_SIMPLEViewModel> MapElements { get; set; } = new List<CourseMapElement_SIMPLEViewModel>();
-
         public int DataPoolId { get; set; }
 
         public int NumberOfPools { get; set; }

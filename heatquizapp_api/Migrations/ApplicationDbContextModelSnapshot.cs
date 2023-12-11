@@ -531,6 +531,9 @@ namespace heatquizappapi.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<long>("ImageSize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("text");
@@ -538,9 +541,6 @@ namespace heatquizappapi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -576,6 +576,9 @@ namespace heatquizappapi.Migrations
 
                     b.Property<int>("ImageHeight")
                         .HasColumnType("integer");
+
+                    b.Property<long>("ImageSize")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageURL")
                         .IsRequired()
@@ -1481,7 +1484,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("PDFURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -1627,11 +1629,9 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Latex")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("QuestionId")
@@ -2264,9 +2264,6 @@ namespace heatquizappapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("AddedById")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2595,7 +2592,7 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.HasOne("heatquizapp_api.Models.Series.QuestionSeries", "QuestionSeries")
-                        .WithMany()
+                        .WithMany("MapElements")
                         .HasForeignKey("QuestionSeriesId");
 
                     b.HasOne("heatquizapp_api.Models.Courses.CourseMapElement", "RequiredElement")
@@ -3128,7 +3125,7 @@ namespace heatquizappapi.Migrations
                         .HasForeignKey("InformationId");
 
                     b.HasOne("HeatQuizAPI.Models.LevelsOfDifficulty.LevelOfDifficulty", "LevelOfDifficulty")
-                        .WithMany()
+                        .WithMany("Questions")
                         .HasForeignKey("LevelOfDifficultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3253,7 +3250,7 @@ namespace heatquizappapi.Migrations
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickChart", b =>
                 {
                     b.HasOne("heatquizapp_api.Models.InterpretedTrees.InterpretedImage", "Answer")
-                        .WithMany()
+                        .WithMany("ClickCharts")
                         .HasForeignKey("AnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3280,7 +3277,7 @@ namespace heatquizappapi.Migrations
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickImage", b =>
                 {
                     b.HasOne("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", "Answer")
-                        .WithMany()
+                        .WithMany("ClickImages")
                         .HasForeignKey("AnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3496,8 +3493,15 @@ namespace heatquizappapi.Migrations
                     b.Navigation("PoolAccesses");
                 });
 
+            modelBuilder.Entity("HeatQuizAPI.Models.LevelsOfDifficulty.LevelOfDifficulty", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", b =>
                 {
+                    b.Navigation("ClickImages");
+
                     b.Navigation("Leafs");
                 });
 
@@ -3533,6 +3537,11 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.Navigation("PDFStatistics");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImage", b =>
+                {
+                    b.Navigation("ClickCharts");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImageGroup", b =>
@@ -3614,6 +3623,8 @@ namespace heatquizappapi.Migrations
             modelBuilder.Entity("heatquizapp_api.Models.Series.QuestionSeries", b =>
                 {
                     b.Navigation("Elements");
+
+                    b.Navigation("MapElements");
 
                     b.Navigation("Statistics");
                 });

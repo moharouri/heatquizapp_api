@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HeatQuizAPI.Database;
+using HeatQuizAPI.Mapping;
 using HeatQuizAPI.Models.LevelsOfDifficulty;
 using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.LevelsOfDifficulty;
@@ -52,8 +53,8 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
                     Id = LOD.Id,
                     Name = LOD.Name,
                     HexColor = LOD.HexColor,
-                    //NUsedQuestions = LOD.Questions.Count,
-                    //CodeUsedQuestions = LOD.Questions.Select(q => q.Code)
+                    NUsedQuestions = LOD.Questions.Count,
+                    CodeUsedQuestions = LOD.Questions.Select(q => q.Code)
                 })
                 .ToListAsync();
 
@@ -65,7 +66,8 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
         [Authorize("admin")]
         public async Task<IActionResult> GetLevelOfDifficultyQuestions(int LODId)
         {
-            /*var level = await _applicationDbContext.LevelsOfDifficulty
+            //Check lod exists
+            var level = await _applicationDbContext.LevelsOfDifficulty
                 .Include(l => l.Questions)
                 .ThenInclude(q => q.Subtopic)
                 .ThenInclude(s => s.Topic)
@@ -79,8 +81,9 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
                 .FirstOrDefaultAsync(l => l.Id == LODId);
 
             if (level is null)
-                return NotFound("Not found");
+                return NotFound("Level of difficulty not found");
 
+            //Get questions
             var qs = level.Questions
                 .Select(q => new {
                     Id = q.Id,
@@ -92,7 +95,7 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
                     DateCreated = q.DateCreated,
 
-                    Base_ImageURL = $"{FILES_PATH}/{q.Base_ImageURL}",
+                    ImageURL = MappingProfile.GetQuestionImageURL(q),
 
                     Subtopic = new
                     {
@@ -107,9 +110,7 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
                 }).OrderBy(q => q.Code).ToList();
 
-            return Ok(qs);*/
-
-            return Ok();
+            return Ok(qs);
         }
 
         [HttpPost("[action]")]
@@ -160,14 +161,14 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
         public async Task<IActionResult> EditLevel([FromBody] AddEditLevelOfDifficultyViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Model Not Valid");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check level exists
             var Level = await _applicationDbContext.LevelsOfDifficulty
                 .FirstOrDefaultAsync(l => l.Id == VM.Id);
 
             if (Level is null)
-                return NotFound("Not found");
+                return NotFound("Level of difficulty not found");
 
             //Check name not null
             if (string.IsNullOrEmpty(VM.Name))
@@ -214,10 +215,10 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
                 .FirstOrDefaultAsync(l => l.Id == VM.Id);
 
             if (Level is null)
-                return NotFound("Not found");
+                return NotFound("Level of difficulty not found");
 
-            /*if (Level.Questions.Count != 0)
-                return BadRequest("Level of difficulty has questions assigned to it");*/
+            if (Level.Questions.Count != 0)
+                return BadRequest("Cannot delete Level of difficulty since some questions assigned to it");
 
             _applicationDbContext.LevelsOfDifficulty.Remove(Level);
             await _applicationDbContext.SaveChangesAsync();

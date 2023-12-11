@@ -94,7 +94,6 @@ namespace heatquizapp_api.Controllers.TopicController
             var topic = new Topic()
             {
                 Name = VM.Name,
-                Active = VM.Active,
                 AddedById = adder.Id,
                 DataPoolId = DP.Id
 

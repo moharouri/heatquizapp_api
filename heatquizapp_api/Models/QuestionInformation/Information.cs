@@ -21,7 +21,7 @@ namespace heatquizapp_api.Models.QuestionInformation
 
         public string? Latex { get; set; }
 
-        public string PDFURL { get; set; }
+        public string? PDFURL { get; set; }
         public long? PDFSize { get; set; }
 
         public List<QuestionBase> Questions = new List<QuestionBase>();

@@ -1,4 +1,5 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Questions;
 
 namespace HeatQuizAPI.Models.LevelsOfDifficulty
 {
@@ -9,5 +10,8 @@ namespace HeatQuizAPI.Models.LevelsOfDifficulty
         public string Name { get; set; }
 
         public string HexColor { get; set; }
+
+        //Relationships
+        public List<QuestionBase> Questions { get; set; } = new List<QuestionBase>();
     }
 }

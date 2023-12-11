@@ -95,7 +95,7 @@ namespace HeatQuizAPI.Services
         //Function to seed datapools
         public void SeedDatapools()
         {
-            const string datapoolName = "Default Datapool";
+            const string datapoolName = "Heat Transfer";
 
             //Check datapool already exists
             var datapoolExists = _context.DataPools.Any(dp => dp.Name == datapoolName || dp.NickName == datapoolName);

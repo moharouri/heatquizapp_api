@@ -11,8 +11,7 @@ namespace heatquizapp_api.Models.InterpretedTrees
         public string AddedById { get; set; }
 
         //Images
-        public List<InterpretedImage> Images { get; set; } 
-        = new List<InterpretedImage>();
+        public List<InterpretedImage> Images { get; set; } = new List<InterpretedImage>();
 
     }
 

@@ -168,7 +168,10 @@ namespace heatquizapp_api.Controllers.CourseMapController
 
                 ShowBorder = VM.ShowBorder,
                 CourseId = Course.Id,
+
                 ImageURL = URL,
+                ImageSize = VM.Picture.Length,
+
                 ImageWidth = (int)VM.LargeMapWidth,
                 ImageHeight = (int)VM.LargeMapLength,
 
@@ -623,7 +626,6 @@ namespace heatquizapp_api.Controllers.CourseMapController
 
             return Ok(_mapper.Map<CourseMapBadgeSystemViewModel>(Group));
         }
-
 
         [HttpPut("[action]")]
         //Change type in vs code

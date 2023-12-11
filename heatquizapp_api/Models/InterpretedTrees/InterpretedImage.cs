@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
 using heatquizapp_api.Models.Auxillary;
+using heatquizapp_api.Models.Questions.SimpleClickableQuestion;
 
 namespace heatquizapp_api.Models.InterpretedTrees
 {
@@ -31,7 +32,8 @@ namespace heatquizapp_api.Models.InterpretedTrees
         public InterpretedImageGroup Group { get; set; }
         public int GroupId { get; set; }
 
-        //public List<ClickChart> ClickCharts { get; set; } = new List<ClickChart>();
+        //Relation
+        public List<ClickChart> ClickCharts { get; set; } = new List<ClickChart>();
     }
 
 }

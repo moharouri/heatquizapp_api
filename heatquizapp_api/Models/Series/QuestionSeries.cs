@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
 using heatquizapp_api.Models.Auxillary;
+using heatquizapp_api.Models.Courses;
 
 namespace heatquizapp_api.Models.Series
 {
@@ -18,11 +19,11 @@ namespace heatquizapp_api.Models.Series
         //Elements
         public List<QuestionSeriesElement> Elements { get; set; } = new List<QuestionSeriesElement>();
 
-
-        //public List<CourseMapElement> MapElements { get; set; } = new List<CourseMapElement>();
-        
         //Statistics
         public List<QuestionSeriesStatistic> Statistics { get; set; } = new List<QuestionSeriesStatistic>();
+
+        //Relations
+        public List<CourseMapElement> MapElements { get; set; } = new List<CourseMapElement>();
 
     }
 }

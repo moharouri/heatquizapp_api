@@ -11,5 +11,7 @@ namespace heatquizapp_api.Models.Questions.SimpleClickableQuestion
         //Question
         public SimpleClickableQuestion Question { get; set; }
         public int QuestionId { get; set; }
+
+        
     }
 }

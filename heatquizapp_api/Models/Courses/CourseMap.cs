@@ -16,6 +16,8 @@ namespace heatquizapp_api.Models.Courses
         public bool Disabled { get; set; }
 
         public string ImageURL { get; set; }
+        public long ImageSize { get; set; }
+
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
 

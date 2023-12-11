@@ -155,8 +155,8 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> GetUnseenCommentsNumber([FromBody] DatapoolCarrierViewModel VM)
+        //Change type in vs code -- name original: GetUnseenCommentsNumber
+        public async Task<IActionResult> GetUnseenComments([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

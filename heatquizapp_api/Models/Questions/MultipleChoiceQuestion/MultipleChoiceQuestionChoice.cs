@@ -8,9 +8,9 @@ namespace heatquizapp_api.Models.Questions.MultipleChoiceQuestion
         public MultipleChoiceQuestion Question { get; set; }
         public int QuestionId { get; set; }
 
-        public string Latex { get; set; }
+        public string? Latex { get; set; }
 
-        public string ImageURL { get; set; }
+        public string? ImageURL { get; set; }
 
         public bool Correct { get; set; }
     }

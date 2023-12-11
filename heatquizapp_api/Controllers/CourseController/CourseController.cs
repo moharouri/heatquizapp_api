@@ -142,7 +142,7 @@ namespace heatquizapp_api.Controllers.CourseController
             var URL = await SaveFile(VM.Picture);
 
             course.ImageURL = URL;
-            course.Size = VM.Picture.Length;
+            course.ImageSize = VM.Picture.Length;
 
             _applicationDbContext.Courses.Add(course);
             await _applicationDbContext.SaveChangesAsync();
@@ -212,7 +212,7 @@ namespace heatquizapp_api.Controllers.CourseController
                 var URL = await SaveFile(VM.Picture);
 
                 Course.ImageURL = URL;
-                Course.Size = VM.Picture.Length;
+                Course.ImageSize = VM.Picture.Length;
             }
 
             await _applicationDbContext.SaveChangesAsync();

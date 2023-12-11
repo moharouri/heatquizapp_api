@@ -436,38 +436,6 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             return Ok();
         }
 
-        [HttpPost("[action]")]
-        public async Task<IActionResult> AddStatistic([FromForm] AddSeriesStatisticViewModel VM)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA); 
-
-            //Check series exists
-             var Series = await _applicationDbContext.QuestionSeries
-                .FirstOrDefaultAsync(q => q.Id == VM.SeriesId);
-
-            if (Series is null)
-                return NotFound("Series not found");
-
-            //Add statistic
-            Series.Statistics.Add(new QuestionSeriesStatistic()
-            {
-                Player = VM.Player,
-                MapKey = VM.MapKey,
-                MapName = VM.MapName,
-                MapElementName = VM.MapElementName,
-                SuccessRate = VM.SuccessRate,
-
-                TotalTime = VM.TotalTime,
-                DataPoolId = Series.DataPoolId,
-                OnMobile = VM.OnMobile,
-            });
-
-            await _applicationDbContext.SaveChangesAsync();
-
-            return Ok();
-        }
-
 
     }
 }

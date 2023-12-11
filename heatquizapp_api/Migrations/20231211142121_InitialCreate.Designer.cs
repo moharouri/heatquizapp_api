@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace heatquizappapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231210172404_map things")]
-    partial class mapthings
+    [Migration("20231211142121_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -321,6 +321,62 @@ namespace heatquizappapi.Migrations
                     b.ToTable("DataPoolAccess");
                 });
 
+            modelBuilder.Entity("heatquizapp_api.Models.BaseModels.DatapoolNotificationSubscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DatapoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("LastSeen")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DatapoolId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DatapoolNotificationSubscriptions");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.BaseModels.UserLinkedPlayerKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("PlayerKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLinkedPlayerKeys");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", b =>
                 {
                     b.Property<int>("Id")
@@ -478,6 +534,9 @@ namespace heatquizappapi.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<long>("ImageSize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("text");
@@ -485,9 +544,6 @@ namespace heatquizappapi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -523,6 +579,9 @@ namespace heatquizappapi.Migrations
 
                     b.Property<int>("ImageHeight")
                         .HasColumnType("integer");
+
+                    b.Property<long>("ImageSize")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageURL")
                         .IsRequired()
@@ -745,6 +804,39 @@ namespace heatquizappapi.Migrations
                     b.HasIndex("DataPoolId");
 
                     b.ToTable("CourseMapElementBadge");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DataPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MapId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataPoolId");
+
+                    b.HasIndex("MapId");
+
+                    b.ToTable("CourseMapKeys");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapPDFStatistics", b =>
@@ -1395,7 +1487,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("PDFURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -1431,6 +1522,9 @@ namespace heatquizappapi.Migrations
                     b.Property<int?>("ImageId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("KeyboardVariableKeyVariationId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("NumericKeyId")
                         .HasColumnType("integer");
 
@@ -1443,6 +1537,8 @@ namespace heatquizappapi.Migrations
                     b.HasIndex("DataPoolId");
 
                     b.HasIndex("ImageId");
+
+                    b.HasIndex("KeyboardVariableKeyVariationId");
 
                     b.HasIndex("NumericKeyId");
 
@@ -1503,14 +1599,14 @@ namespace heatquizappapi.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int?>("KeyboardQuestionId")
+                    b.Property<int>("QuestionId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DataPoolId");
 
-                    b.HasIndex("KeyboardQuestionId");
+                    b.HasIndex("QuestionId");
 
                     b.ToTable("KeyboardQuestionWrongAnswers");
                 });
@@ -1536,11 +1632,9 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Latex")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("QuestionId")
@@ -1570,6 +1664,9 @@ namespace heatquizappapi.Migrations
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("CommentSectionId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("DataPoolId")
                         .HasColumnType("integer");
@@ -1635,6 +1732,148 @@ namespace heatquizappapi.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("QuestionBase");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddedById")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CommentSectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DataPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddedById");
+
+                    b.HasIndex("CommentSectionId");
+
+                    b.HasIndex("DataPoolId");
+
+                    b.ToTable("QuestionComments");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DataPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataPoolId");
+
+                    b.HasIndex("QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("QuestionCommentSection");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSectionTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddedById")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DataPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("LastSeen")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddedById");
+
+                    b.HasIndex("DataPoolId");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("QuestionCommentSectionTags");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DataPoolId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("DataPoolId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("QuestionCommentTags");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickChart", b =>
@@ -2028,9 +2267,6 @@ namespace heatquizappapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("AddedById")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2167,6 +2403,36 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.Navigation("DataPool");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.BaseModels.DatapoolNotificationSubscription", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "Datapool")
+                        .WithMany()
+                        .HasForeignKey("DatapoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Datapool");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.BaseModels.UserLinkedPlayerKey", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -2329,7 +2595,7 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.HasOne("heatquizapp_api.Models.Series.QuestionSeries", "QuestionSeries")
-                        .WithMany()
+                        .WithMany("MapElements")
                         .HasForeignKey("QuestionSeriesId");
 
                     b.HasOne("heatquizapp_api.Models.Courses.CourseMapElement", "RequiredElement")
@@ -2364,6 +2630,25 @@ namespace heatquizappapi.Migrations
                     b.Navigation("CourseMapElement");
 
                     b.Navigation("DataPool");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapKey", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "DataPool")
+                        .WithMany()
+                        .HasForeignKey("DataPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("heatquizapp_api.Models.Courses.CourseMap", "Map")
+                        .WithMany()
+                        .HasForeignKey("MapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DataPool");
+
+                    b.Navigation("Map");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapPDFStatistics", b =>
@@ -2752,8 +3037,12 @@ namespace heatquizappapi.Migrations
                         .WithMany()
                         .HasForeignKey("ImageId");
 
+                    b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", null)
+                        .WithMany("AnswerElements")
+                        .HasForeignKey("KeyboardVariableKeyVariationId");
+
                     b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardNumericKeyRelation", "NumericKey")
-                        .WithMany()
+                        .WithMany("AnswerElements")
                         .HasForeignKey("NumericKeyId");
 
                     b.Navigation("DataPool");
@@ -2790,11 +3079,15 @@ namespace heatquizappapi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("heatquizapp_api.Models.Questions.KeyboardQuestion.KeyboardQuestion", null)
+                    b.HasOne("heatquizapp_api.Models.Questions.KeyboardQuestion.KeyboardQuestion", "Question")
                         .WithMany("WrongAnswers")
-                        .HasForeignKey("KeyboardQuestionId");
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("DataPool");
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.MultipleChoiceQuestion.MultipleChoiceQuestionChoice", b =>
@@ -2835,7 +3128,7 @@ namespace heatquizappapi.Migrations
                         .HasForeignKey("InformationId");
 
                     b.HasOne("HeatQuizAPI.Models.LevelsOfDifficulty.LevelOfDifficulty", "LevelOfDifficulty")
-                        .WithMany()
+                        .WithMany("Questions")
                         .HasForeignKey("LevelOfDifficultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2857,10 +3150,110 @@ namespace heatquizappapi.Migrations
                     b.Navigation("Subtopic");
                 });
 
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionComment", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.User", "AddedBy")
+                        .WithMany()
+                        .HasForeignKey("AddedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("heatquizapp_api.Models.Questions.QuestionCommentSection", "CommentSection")
+                        .WithMany("Comments")
+                        .HasForeignKey("CommentSectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "DataPool")
+                        .WithMany()
+                        .HasForeignKey("DataPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AddedBy");
+
+                    b.Navigation("CommentSection");
+
+                    b.Navigation("DataPool");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSection", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "DataPool")
+                        .WithMany()
+                        .HasForeignKey("DataPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("heatquizapp_api.Models.Questions.QuestionBase", "Question")
+                        .WithOne("CommentSection")
+                        .HasForeignKey("heatquizapp_api.Models.Questions.QuestionCommentSection", "QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DataPool");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSectionTag", b =>
+                {
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.User", "AddedBy")
+                        .WithMany()
+                        .HasForeignKey("AddedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "DataPool")
+                        .WithMany()
+                        .HasForeignKey("DataPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("heatquizapp_api.Models.Questions.QuestionCommentSection", "Section")
+                        .WithMany("Tages")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AddedBy");
+
+                    b.Navigation("DataPool");
+
+                    b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentTag", b =>
+                {
+                    b.HasOne("heatquizapp_api.Models.Questions.QuestionComment", "Comment")
+                        .WithMany("Tages")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.DataPool", "DataPool")
+                        .WithMany()
+                        .HasForeignKey("DataPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HeatQuizAPI.Models.BaseModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("DataPool");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickChart", b =>
                 {
                     b.HasOne("heatquizapp_api.Models.InterpretedTrees.InterpretedImage", "Answer")
-                        .WithMany()
+                        .WithMany("ClickCharts")
                         .HasForeignKey("AnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2887,7 +3280,7 @@ namespace heatquizappapi.Migrations
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickImage", b =>
                 {
                     b.HasOne("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", "Answer")
-                        .WithMany()
+                        .WithMany("ClickImages")
                         .HasForeignKey("AnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3103,8 +3496,15 @@ namespace heatquizappapi.Migrations
                     b.Navigation("PoolAccesses");
                 });
 
+            modelBuilder.Entity("HeatQuizAPI.Models.LevelsOfDifficulty.LevelOfDifficulty", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", b =>
                 {
+                    b.Navigation("ClickImages");
+
                     b.Navigation("Leafs");
                 });
 
@@ -3142,6 +3542,11 @@ namespace heatquizappapi.Migrations
                     b.Navigation("PDFStatistics");
                 });
 
+            modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImage", b =>
+                {
+                    b.Navigation("ClickCharts");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImageGroup", b =>
                 {
                     b.Navigation("Images");
@@ -3163,11 +3568,21 @@ namespace heatquizappapi.Migrations
                     b.Navigation("Relations");
                 });
 
+            modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardNumericKeyRelation", b =>
+                {
+                    b.Navigation("AnswerElements");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKey", b =>
                 {
                     b.Navigation("Relations");
 
                     b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", b =>
+                {
+                    b.Navigation("AnswerElements");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeysList", b =>
@@ -3184,6 +3599,9 @@ namespace heatquizappapi.Migrations
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionBase", b =>
                 {
+                    b.Navigation("CommentSection")
+                        .IsRequired();
+
                     b.Navigation("QuestionPDFStatistics");
 
                     b.Navigation("QuestionStatistics");
@@ -3193,9 +3611,23 @@ namespace heatquizappapi.Migrations
                     b.Navigation("StudentFeedback");
                 });
 
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionComment", b =>
+                {
+                    b.Navigation("Tages");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSection", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Tages");
+                });
+
             modelBuilder.Entity("heatquizapp_api.Models.Series.QuestionSeries", b =>
                 {
                     b.Navigation("Elements");
+
+                    b.Navigation("MapElements");
 
                     b.Navigation("Statistics");
                 });

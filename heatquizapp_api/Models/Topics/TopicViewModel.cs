@@ -9,8 +9,6 @@ namespace heatquizapp_api.Models.Topics
 
         public string AddedByName { get; set; }
 
-        public bool Active { get; set; }
-
         //Subtopics
         public List<SubtopicViewModel> Subtopics { get; set; } = new List<SubtopicViewModel>();
     }
