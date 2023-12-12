@@ -1,10 +1,13 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.BaseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Xml;
 
@@ -13,7 +16,6 @@ namespace heatquizapp_api.Middleware
     public class DatapoolAccessibilityMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ApplicationDbContext _applicationDbContext;
 
         public DatapoolAccessibilityMiddleware
             (
@@ -22,16 +24,17 @@ namespace heatquizapp_api.Middleware
             )
         {
             _next = next;
-            _applicationDbContext = applicationDbContext;
         }
 
       
-        public async Task InvokeAsync(HttpContext context, UserManager<User> userManager, ILogger<DatapoolAccessibilityMiddleware> logger)
+        public async Task InvokeAsync(HttpContext context, UserManager<User> userManager, ILogger<DatapoolAccessibilityMiddleware> logger, ApplicationDbContext applicationDbContext)
         {
             
             //Check if the request is sent to datapool aware controller
             if (context.Request.Path.StartsWithSegments("/apidpaware"))
             {
+               
+
                 //Check if the request sent by a registered user or a player
                 var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -52,11 +55,39 @@ namespace heatquizapp_api.Middleware
                     //Get datapool Id from request
                     int datapoolId = 0;
 
+                    
                     if (context.Request.HasJsonContentType())
                     {
-                        var requestBody = JsonSerializer.Deserialize<dynamic>(context.Request.Body);
+                        var request = context.Request;
 
-                        if(requestBody != null)
+                        request.EnableBuffering();
+                        var buffer = new byte[Convert.ToInt32(request.ContentLength)];
+
+                        await request.Body.ReadAsync(buffer, 0, buffer.Length);
+
+                        var requestContent = Encoding.UTF8.GetString(buffer);
+
+                        if(requestContent is null)
+                        {
+                            await handleDatapoolNotAuthorized(context, "Empty body");
+                            return;
+                        }
+
+                        DatapoolCarrierViewModel requestBody = null;
+
+                        try
+                        {
+                            requestBody = JsonConvert.DeserializeObject<DatapoolCarrierViewModel>(requestContent);
+                        }
+                        catch
+                        {
+
+                        }
+
+                        //rewinding the stream to 0
+                        request.Body.Position = 0;                      
+
+                        if(!(requestBody is null))
                         {
                             try
                             {
@@ -85,8 +116,10 @@ namespace heatquizapp_api.Middleware
                         int.TryParse(dpIdString, out datapoolId);
                     }
 
+                   
+
                     //Check if datapool exists
-                    var datapool = await _applicationDbContext.DataPools
+                    var datapool = await applicationDbContext.DataPools
                         .Include(p => p.PoolAccesses)
                         .FirstOrDefaultAsync(dp => dp.Id == datapoolId);
 

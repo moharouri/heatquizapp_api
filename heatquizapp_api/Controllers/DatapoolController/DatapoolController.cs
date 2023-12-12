@@ -86,7 +86,9 @@ namespace heatquizapp_api.Controllers.DatapoolController
             {
                 Name = VM.Name,
                 NickName = VM.NickName,
-                IsHidden = false
+                IsHidden = false,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now,
             });
 
             await _applicationDbContext.SaveChangesAsync();
@@ -118,6 +120,7 @@ namespace heatquizapp_api.Controllers.DatapoolController
             DP.Name = VM.Name;
             DP.NickName = VM.NickName;
             DP.IsHidden = VM.IsHidden;
+            DP.DateModified = DateTime.Now;
 
             await _applicationDbContext.SaveChangesAsync();
 

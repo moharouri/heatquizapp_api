@@ -9,7 +9,6 @@ namespace heatquizapp_api.Models.QuestionInformation
         public DateTime? DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
 
-        public DataPool DataPool { get; set; }
         public int DataPoolId { get; set; }
 
         public string AddedByName { get; set; }

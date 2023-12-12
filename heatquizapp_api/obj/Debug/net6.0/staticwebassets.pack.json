@@ -1,12 +1,28 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\aluvri5z.khc.png",
-      "PackagePath": "staticwebassets\\Files\\aluvri5z.khc.png"
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\2aha4lwl.quk.jpg",
+      "PackagePath": "staticwebassets\\Files\\2aha4lwl.quk.jpg"
     },
     {
-      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\pmoyxgec.qyf.png",
-      "PackagePath": "staticwebassets\\Files\\pmoyxgec.qyf.png"
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\feii5crb.3xn.jpg",
+      "PackagePath": "staticwebassets\\Files\\feii5crb.3xn.jpg"
+    },
+    {
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\mcc3mkfo.3ld.png",
+      "PackagePath": "staticwebassets\\Files\\mcc3mkfo.3ld.png"
+    },
+    {
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\oaa3c1p2.hze.png",
+      "PackagePath": "staticwebassets\\Files\\oaa3c1p2.hze.png"
+    },
+    {
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\rlsof2kv.53b.jpg",
+      "PackagePath": "staticwebassets\\Files\\rlsof2kv.53b.jpg"
+    },
+    {
+      "Id": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\x5oj50wf.b4l.pdf",
+      "PackagePath": "staticwebassets\\Files\\x5oj50wf.b4l.pdf"
     },
     {
       "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.heatquizapp_api.props",

@@ -7,7 +7,6 @@
         public DateTime? DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
 
-        public DataPool DataPool { get; set; }
         public int DataPoolId { get; set; }
     }
 }

@@ -44,7 +44,6 @@ namespace heatquizapp_api.Controllers.CourseController
         }
 
         [HttpPost("[action]")]
-        //Change type and name in vs code -- original GetAllCourses_PORTAL
         public async Task<IActionResult> GetAllCourses([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -66,7 +65,6 @@ namespace heatquizapp_api.Controllers.CourseController
         }
 
         [HttpGet("[action]/{Id}")]
-        //Change name in vs code -- original: GetCourseById_PORTAL
         public async Task<IActionResult> GetCourseById(int Id)
         {
             var Course = await _applicationDbContext.Courses
@@ -195,7 +193,7 @@ namespace heatquizapp_api.Controllers.CourseController
             Course.Name = VM.Name;
             Course.Code = VM.Code;
 
-            if (!VM.SameImage)
+            if (VM.SameImage.HasValue && !VM.SameImage.Value)
             {
 
                 //Check Picture

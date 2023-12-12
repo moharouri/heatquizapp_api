@@ -4,7 +4,7 @@ using heatquizapp_api.Models.Questions;
 
 namespace heatquizapp_api.Models.QuestionInformation
 {
-    public class Information : IAddedByCarrier
+    public class Information : IAddedByCarrier, IPDFCarrier
     {
         public int Id { get; set; }
 

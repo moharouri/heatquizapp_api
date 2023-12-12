@@ -44,7 +44,6 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
         [HttpGet("[action]")]
         [Authorize("admin")]
-        //change name in vs code original GetLevelsOfDifficulty_PORTAL_EXTENDED_DETAILS
         public async Task<IActionResult> GetLevelsOfDifficultyDetailed()
         {
             var Levels = await _applicationDbContext.LevelsOfDifficulty
@@ -157,7 +156,6 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
         [HttpPut("[action]")]
         [Authorize("admin")]
-        //change type in vs code
         public async Task<IActionResult> EditLevel([FromBody] AddEditLevelOfDifficultyViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -201,18 +199,17 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
             return Ok();
         }
 
-        [HttpDelete("[action]")]
+        [HttpDelete("[action]/{Id}")]
         [Authorize("admin")]
-        //change type in vs code
-        public async Task<IActionResult> DeleteLevel([FromBody] LevelOfDifficultyViewModel VM)
+        public async Task<IActionResult> DeleteLevel(int Id)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Model Not Valid");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check level exists
             var Level = await _applicationDbContext.LevelsOfDifficulty
-                //.Include(l => l.Questions)
-                .FirstOrDefaultAsync(l => l.Id == VM.Id);
+                .Include(l => l.Questions)
+                .FirstOrDefaultAsync(l => l.Id == Id);
 
             if (Level is null)
                 return NotFound("Level of difficulty not found");

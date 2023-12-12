@@ -15,7 +15,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.InformationController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class InformationController : Controller
@@ -45,8 +45,7 @@ namespace heatquizapp_api.Controllers.InformationController
         }
 
 
-        [HttpGet("[action]")]
-        //Change type in vs code
+        [HttpPost("[action]")]
         public async Task<IActionResult> GetAllInformation([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -65,7 +64,7 @@ namespace heatquizapp_api.Controllers.InformationController
         public async Task<IActionResult> SearchInformationQuestions([FromBody] InformationViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid request");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check it exists
             var Information = await _applicationDbContext.Information
@@ -146,7 +145,6 @@ namespace heatquizapp_api.Controllers.InformationController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditCode([FromForm] UpdateExplanationViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -178,7 +176,6 @@ namespace heatquizapp_api.Controllers.InformationController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditLatex([FromForm] UpdateExplanationViewModel VM)
         {
             if(!ModelState.IsValid)
@@ -202,7 +199,6 @@ namespace heatquizapp_api.Controllers.InformationController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditPDF([FromForm] UpdateExplanationViewModel VM)
         {
             if(!ModelState.IsValid)
@@ -218,10 +214,7 @@ namespace heatquizapp_api.Controllers.InformationController
             //Remove the already existing file if it exists
             if(Info.PDFURL != null)
             {
-                var removeImageResult = RemoveFile(Info.PDFURL);
-
-                if (!removeImageResult)
-                    return BadRequest("Failed to remove the existing PDF file");
+                RemoveFile(Info.PDFURL);
             }
 
             //PDF
@@ -243,8 +236,7 @@ namespace heatquizapp_api.Controllers.InformationController
             return Ok();
         }
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
+        [HttpPut("[action]")]
         public async Task<IActionResult> RemovePDF([FromForm] UpdateExplanationViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -263,10 +255,7 @@ namespace heatquizapp_api.Controllers.InformationController
             //Remove the already existing file if it exists
             if (Info.PDFURL != null)
             {
-                var removeImageResult = RemoveFile(Info.PDFURL);
-
-                if (!removeImageResult)
-                    return BadRequest("Failed to remove the existing PDF file");
+                RemoveFile(Info.PDFURL);
             }
 
             Info.PDFURL = null;

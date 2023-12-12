@@ -89,7 +89,7 @@ namespace heatquizapp_api.Utilities
         public static bool RemoveFile(string sourcePath)
         { 
             //Get path
-            var path = Path.Combine("wwwroot", sourcePath);
+            var path = Path.Combine("wwwroot/Files", sourcePath);
 
             if (File.Exists(path))
             {

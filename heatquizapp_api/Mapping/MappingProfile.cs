@@ -5,6 +5,7 @@ using heatquizapp_api.Models.Auxillary;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.ClickImageTrees;
 using heatquizapp_api.Models.Courses;
+using heatquizapp_api.Models.DefaultQuestionImages;
 using heatquizapp_api.Models.InterpretedTrees;
 using heatquizapp_api.Models.Keyboard;
 using heatquizapp_api.Models.QuestionInformation;
@@ -62,13 +63,15 @@ namespace HeatQuizAPI.Mapping
             CreateMap<DataPool, DataPoolViewModel>();
             CreateMap<DataPool, DataPoolViewModelAdmin>();
 
-            CreateMap<DataPoolAccess, DataPoolAccessViewModel>();
+            CreateMap<DataPoolAccess, DataPoolAccessViewModel>(); 
+            CreateMap<DatapoolNotificationSubscription, DatapoolNotificationSubscriptionViewModel>(); 
 
             //Level of difficulty
             CreateMap<LevelOfDifficulty, LevelOfDifficultyViewModel>();
 
             //Explanations 
             CreateMap<Information, InformationViewModel>()
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt))
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
 
             //Courses
@@ -171,6 +174,10 @@ namespace HeatQuizAPI.Mapping
             CreateMap<CourseMapBadgeSystemEntity, CourseMapBadgeSystemEntityViewModel>()
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));
 
+            //Default question image
+            CreateMap<DefaultQuestionImage, DefaultQuestionImageViewModel>()
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
+                .ForMember(vm => vm.ImageURL, opt => mapImage(opt));
         }
     }
 }

@@ -15,7 +15,7 @@ using System.Reflection.Emit;
 namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class DefaultQuestionImageController : Controller
@@ -44,7 +44,6 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> GetAllImages([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -117,7 +116,7 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 
         [HttpPut("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> EditCode([FromForm] UpdateDefaultImageCodeViewModel VM)
+        public async Task<IActionResult> EditCode([FromForm] UpdateDeleteDefaultImageCodeViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -147,7 +146,7 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 
         [HttpPut("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> EditImage([FromForm] UpdateDefaultImageCodeViewModel VM)
+        public async Task<IActionResult> EditImage([FromForm] UpdateDeleteDefaultImageCodeViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -169,16 +168,41 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
             if (!isExtenstionValid)
                 return BadRequest("Picture extension not valid");
 
+            //Try deleting existing image
+            RemoveFile(QI.ImageURL);
+
             //Save image and generate url
             var URL = await SaveFile(VM.Picture);
 
             QI.ImageURL = URL;
             QI.ImageSize = VM.Picture.Length;
+          
 
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok(_mapper.Map<DefaultQuestionImageViewModel>(QI));
+        }
+
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteImage([FromBody] UpdateDeleteDefaultImageCodeViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var qi = await _applicationDbContext.DefaultQuestionImages
+                .FirstOrDefaultAsync(i => i.Id == VM.Id);
+
+            if (qi is null)
+                return BadRequest("Image not found");
+
+            //Try deleting existing image
+            RemoveFile(qi.ImageURL);
+
+            _applicationDbContext.DefaultQuestionImages.Remove(qi);
             await _applicationDbContext.SaveChangesAsync();
 
             return Ok();
         }
-
     }
 }

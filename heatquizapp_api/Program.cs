@@ -22,7 +22,7 @@ builder.Services.AddScoped<UserManager<User>>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files")));
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -63,15 +63,13 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files")),
     RequestPath = "/Files"
 });
 
 app.UseDirectoryBrowser(new DirectoryBrowserOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files")),
     RequestPath = "/Files"
 });
 
@@ -88,10 +86,11 @@ app.UseAuthorization();
 //Generate token @login 
 app.UseMiddleware<TokenProviderMiddleware>();
 
+app.MapControllers();
+
 //Datapool accessibility placed after authorization and authentication
 app.UseMiddleware<DatapoolAccessibilityMiddleware>();
 
-app.MapControllers();
 
 //Seed database -- only once
 /*var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
