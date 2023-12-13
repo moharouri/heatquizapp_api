@@ -15,7 +15,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.QuestionSeriesController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class QuestionSeriesController : Controller

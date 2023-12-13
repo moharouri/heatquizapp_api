@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "bIgMPxYue5m08zlRouQHXCxOX1RQt+YkTZCZXlUgajY=",
+  "Hash": "dRHf2HOoGgRUSh/2Y7aKmyA0rWslhEq6ZDp5HQeAvp0=",
   "Source": "heatquizapp_api",
   "BasePath": "_content/heatquizapp_api",
   "Mode": "Default",
@@ -17,12 +17,12 @@
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\2aha4lwl.quk.jpg",
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\adgu012l.di4.png",
       "SourceId": "heatquizapp_api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
       "BasePath": "_content/heatquizapp_api",
-      "RelativePath": "Files/2aha4lwl.quk.jpg",
+      "RelativePath": "Files/adgu012l.di4.png",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -31,7 +31,24 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\Files\\2aha4lwl.quk.jpg"
+      "OriginalItemSpec": "wwwroot\\Files\\adgu012l.di4.png"
+    },
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\d52s3tr0.qhw.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/d52s3tr0.qhw.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\d52s3tr0.qhw.png"
     },
     {
       "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\feii5crb.3xn.jpg",
@@ -68,6 +85,23 @@
       "OriginalItemSpec": "wwwroot\\Files\\mcc3mkfo.3ld.png"
     },
     {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\n34ruvf3.4vg.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/n34ruvf3.4vg.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\n34ruvf3.4vg.png"
+    },
+    {
       "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\oaa3c1p2.hze.png",
       "SourceId": "heatquizapp_api",
       "SourceType": "Discovered",
@@ -83,6 +117,40 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Files\\oaa3c1p2.hze.png"
+    },
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\p2lnlejm.nmd.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/p2lnlejm.nmd.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\p2lnlejm.nmd.png"
+    },
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\rez4s51x.5r3.pdf",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/rez4s51x.5r3.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\rez4s51x.5r3.pdf"
     },
     {
       "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\rlsof2kv.53b.jpg",
@@ -102,6 +170,23 @@
       "OriginalItemSpec": "wwwroot\\Files\\rlsof2kv.53b.jpg"
     },
     {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\tchrhyo0.gt1.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/tchrhyo0.gt1.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\tchrhyo0.gt1.png"
+    },
+    {
       "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\x5oj50wf.b4l.pdf",
       "SourceId": "heatquizapp_api",
       "SourceType": "Discovered",
@@ -117,6 +202,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Files\\x5oj50wf.b4l.pdf"
+    },
+    {
+      "Identity": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\Files\\xb4v1zym.a0c.png",
+      "SourceId": "heatquizapp_api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mmo19\\source\\repos\\heatquizapp_api\\heatquizapp_api\\wwwroot\\",
+      "BasePath": "_content/heatquizapp_api",
+      "RelativePath": "Files/xb4v1zym.a0c.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Files\\xb4v1zym.a0c.png"
     }
   ]
 }

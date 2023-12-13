@@ -382,9 +382,6 @@ namespace heatquizappapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Choosable")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("DataPoolId")
                         .HasColumnType("integer");
 
@@ -394,7 +391,7 @@ namespace heatquizappapi.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("GroupId")
+                    b.Property<int?>("GroupId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ImageURL")
@@ -2444,9 +2441,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasOne("heatquizapp_api.Models.ClickImageTrees.ImageAnswerGroup", "Group")
                         .WithMany("Images")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", "Root")
                         .WithMany("Leafs")

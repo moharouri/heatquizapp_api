@@ -1,4 +1,5 @@
 ﻿using HeatQuizAPI.Models.BaseModels;
+using heatquizapp_api.Models.Questions.SimpleClickableQuestion;
 
 namespace heatquizapp_api.Models.ClickImageTrees
 {
@@ -21,6 +22,6 @@ namespace heatquizapp_api.Models.ClickImageTrees
         //Leafs
         public List<ImageAnswerViewModel> Leafs { get; set; } = new List<ImageAnswerViewModel>();
 
-        //public List<ClickImageViewModel> ClickImages { get; set; } = new List<ClickImageViewModel>();
+        public List<ClickImageViewModel> ClickImages { get; set; } = new List<ClickImageViewModel>();
     }
 }

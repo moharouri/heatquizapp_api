@@ -85,9 +85,9 @@ namespace heatquizapp_api.Middleware
                         }
 
                         //rewinding the stream to 0
-                        request.Body.Position = 0;                      
+                        request.Body.Position = 0;
 
-                        if(!(requestBody is null))
+                        if (!(requestBody is null))
                         {
                             try
                             {

@@ -205,7 +205,6 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        //Change name and position controller-wise -- original: PostStatistic
         public async Task<IActionResult> AddQuestionStatistic([FromForm] AddQuestionStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -276,7 +275,6 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        //Change position controller-wise 
         public async Task<IActionResult> AddQuestionPDFStatistic([FromForm] AddQuestionPDFStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -303,8 +301,8 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        //Change position controller-wise
-        public async Task<IActionResult> AddStatistic([FromForm] AddSeriesStatisticViewModel VM)
+        //Change position controller-wise, change name
+        public async Task<IActionResult> AddSeriesStatistic([FromForm] AddSeriesStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

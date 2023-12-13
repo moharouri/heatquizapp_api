@@ -14,8 +14,6 @@ namespace heatquizapp_api.Models.Questions
 
         //Added By
         public string AddedByName { get; set; }
-        public string AddedById { get; set; }
-
 
         //Level of difficulty
         public LevelOfDifficultyViewModel LevelOfDifficulty { get; set; }

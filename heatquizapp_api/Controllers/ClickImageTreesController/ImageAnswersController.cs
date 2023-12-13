@@ -11,11 +11,13 @@ using Microsoft.EntityFrameworkCore;
 using static heatquizapp_api.Utilities.Utilities;
 using HeatQuizAPI.Utilities;
 using System.Xml.Linq;
+using heatquizapp_api.Models;
+using System.Text.RegularExpressions;
 
 namespace heatquizapp_api.Controllers.ClickImageTreesController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class ImageAnswersController : Controller
@@ -46,7 +48,6 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
 
         [HttpPost("[action]")]
         [AllowAnonymous]
-        //Change type change name original: GetImageAnswerGroups
         public async Task<IActionResult> GetClickTrees([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -60,35 +61,24 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
                 return NotFound("Datapool does not exist");
 
             var Groups = await _applicationDbContext.ImageAnswerGroups
+                .Where(g => g.DataPoolId == VM.DatapoolId)
+
                 .Include(g => g.AddedBy)
+                .Include(g => g.Images)
+                .ThenInclude(l => l.ClickImages)
+
+                .Include(g => g.Images)
+                .ThenInclude(ia => ia.Leafs)
+                .ThenInclude(l => l.ClickImages)
 
                 .OrderBy(g => g.Name)
-
-                .Where(g => g.DataPoolId == VM.DatapoolId)
                 .ToListAsync();
-
-            var IAs = await _applicationDbContext.ImageAnswers
-                .Where(ia => Groups.Any(g => g.Id == ia.GroupId) && !ia.RootId.HasValue)
-                .Include(ia => ia.Leafs)
-                //.ThenInclude(l => l.ClickImages)
-                //.Include(ia => ia.ClickImages)
-                .Where(g => g.DataPoolId == VM.DatapoolId)
-
-                .ToListAsync();
-
-            foreach (var g in Groups)
-            {
-                g.Images = IAs
-                    .Where(ia => ia.GroupId == g.Id)
-                    .ToList();
-            }
 
             return Ok(_mapper.Map<List<ImageAnswerGroup>, List<ImageAnswerGroupViewModel>>(Groups));
         }
 
         [HttpPost("[action]")]
-        //Change name in vs code AddGroup
-        public async Task<IActionResult> AddTree([FromBody] ImageAnswerGroupViewModel VM)
+        public async Task<IActionResult> AddTree([FromBody] AddImageAnswerGroupViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -128,8 +118,7 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
         }
 
         [HttpPut("[action]")]
-        //Change name and type in vs code original EditGroup
-        public async Task<IActionResult> EditTree([FromBody] ImageAnswerGroupViewModel VM)
+        public async Task<IActionResult> EditTree([FromBody] UpdateImageAnswerGroupViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -160,9 +149,8 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             return Ok(_mapper.Map<ImageAnswerGroup, ImageAnswerGroupViewModel>(Tree));
         }
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> DeleteTree([FromBody] ImageAnswerGroupViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteTree([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -171,25 +159,37 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
 
                 .Include(g => g.Images)
                 .ThenInclude(ia => ia.Leafs)
-                //.ThenInclude(l => l.ClickImages)
+                .ThenInclude(l => l.ClickImages)
 
                 .Include(g => g.Images)
-                //.ThenInclude(ia => ia.ClickImages)
+                .ThenInclude(ia => ia.ClickImages)
 
                 .FirstOrDefaultAsync(ia => ia.Id == VM.Id);
 
             if (Tree is null)
-                return NotFound("Tree not Found");
+                return NotFound("Tree not found");
 
-            /*if (Tree.Images.Any(a => a.ClickImages.Count != 0 || a.Leafs.Any(l => l.ClickImages.Count != 0)))
-                return BadRequest("Tree Used in Questions, Can't Be Deleted");*/
+            if (Tree.Images.Any(a => a.ClickImages.Count != 0 || a.Leafs.Any(l => l.ClickImages.Count != 0)))
+                return BadRequest("Tree used in questions, can't be deleted");
 
             //Remove
             foreach (var i in Tree.Images)
             {
                 foreach (var ai in i.Leafs)
                 {
+                    //Try remove image
+                    if(ai.ImageURL != null)
+                    {
+                        RemoveFile(ai.ImageURL);
+                    }
+
                     _applicationDbContext.ImageAnswers.Remove(ai);
+                }
+
+                //Try remove image
+                if (i.ImageURL != null)
+                {
+                    RemoveFile(i.ImageURL);
                 }
 
                 _applicationDbContext.ImageAnswers.Remove(i);
@@ -214,13 +214,18 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             //Check tree exists
             var Tree = await _applicationDbContext.ImageAnswerGroups
                 .Include(g => g.Images)
-
+                .ThenInclude(i => i.Leafs)
                 .FirstOrDefaultAsync(g => g.Id == VM.GroupId);
 
             if (Tree is null)
-                return NotFound($"Tree not found");
+                return NotFound("Tree not found");
 
-            if (Tree.Images.Any(i => i.Name == VM.Name))
+            var OtherImages = new List<ImageAnswer>();
+
+            OtherImages.AddRange(Tree.Images);
+            OtherImages.AddRange(Tree.Images.Select(a => a.Leafs).SelectMany(r => r));
+
+            if (OtherImages.Any(i => i.Name == VM.Name))
                 return BadRequest("Name already used within the tree");
 
             
@@ -228,8 +233,6 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             var Answer = new ImageAnswer()
             {
                 Name = VM.Name,
-                Choosable = false,
-                GroupId = Tree.Id,
                 DataPoolId = Tree.DataPoolId
             };
 
@@ -251,6 +254,10 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
                     return BadRequest("Name already used within the node");
 
                 Answer.RootId = Root.Id;
+            }
+            else
+            {
+                Answer.GroupId = Tree.Id;
             }
 
             if (VM.Picture is null)
@@ -275,7 +282,6 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditAnswerImageOneStep([FromForm] EditNodeViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -283,11 +289,14 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
 
             //Check Answer Exists
             var Answer = await _applicationDbContext.ImageAnswers
-
                 .Include(aa => aa.Group)
                 .ThenInclude(g => g.Images)
                 .ThenInclude(i => i.Leafs)
-                .Include(aa => aa.Group)
+
+                .Include(aa => aa.Root)
+                .ThenInclude(g => g.Group)
+                .ThenInclude(g => g.Images)
+                .ThenInclude(i => i.Leafs)
 
                 .FirstOrDefaultAsync(a => a.Id == VM.AnswerId);
 
@@ -298,12 +307,28 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             if (string.IsNullOrEmpty(VM.Name))
                 return BadRequest("Please provide name");
           
-            var Group = Answer.Group;
+            var OtherImages = new List<ImageAnswer>();
 
-            if (Group.Images.Any(i => i.Name == VM.Name && i.Id != VM.AnswerId))
+            ImageAnswerGroup Tree;
+
+            if (Answer.RootId.HasValue)
+            {
+                Tree = Answer.Root.Group;
+            }
+            else
+            {
+                Tree = Answer.Group;
+            }
+
+            OtherImages.AddRange(Tree.Images);
+            OtherImages.AddRange(Tree.Images.Select(a => a.Leafs).SelectMany(r => r));
+
+            if (OtherImages.Any(i => i.Name == VM.Name && i.Id != VM.AnswerId))
                 return BadRequest("Name already used within the group");
 
-            if (!VM.SameImage)
+            
+
+            if (VM.SameImage.HasValue && !VM.SameImage.Value)
             {
                 if (VM.Picture is null)
                     return BadRequest("Please provide picture");
@@ -313,6 +338,12 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
 
                 if (!isExtenstionValid)
                     return BadRequest("Picture extenstion not valid");
+
+                //Try remove image
+                if (Answer.ImageURL != null)
+                {
+                    RemoveFile(Answer.ImageURL);
+                }
 
                 //Save image and generate url for it
                 var URL = await SaveFile(VM.Picture);
@@ -329,9 +360,8 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             return Ok(_mapper.Map<ImageAnswer, ImageAnswerViewModel>(Answer));
         }
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> DeleteNode([FromBody] ImageAnswerViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteNode([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -339,19 +369,29 @@ namespace heatquizapp_api.Controllers.ClickImageTreesController
             //Check node exists
             var IA = await _applicationDbContext.ImageAnswers
                 .Include(ia => ia.Leafs)
-                //.ThenInclude(l => l.ClickImages)
-                //.Include(ia => ia.ClickImages)
+                .ThenInclude(l => l.ClickImages)
+                .Include(ia => ia.ClickImages)
                 .FirstOrDefaultAsync(ia => ia.Id == VM.Id);
 
             if (IA is null)
                 return NotFound("Node not found");
 
-            /*if (IA.ClickImages.Count != 0 || IA.Leafs.Any(l => l.ClickImages.Count != 0))
-                return BadRequest("Node Used in Questions, Can't Be Deleted");*/
+            if (IA.ClickImages.Count != 0 || IA.Leafs.Any(l => l.ClickImages.Count != 0))
+                return BadRequest("Node used in questions, can't be deleted");
+
+            //Try remove image
+            if(IA.ImageURL != null)
+            {
+                RemoveFile(IA.ImageURL);
+            }
 
             //Remove
             foreach (var ai in IA.Leafs)
             {
+                if (ai.ImageURL != null)
+                {
+                    RemoveFile(ai.ImageURL);
+                }
                 _applicationDbContext.ImageAnswers.Remove(ai);
             }
 

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using HeatQuizAPI.Database;
+using HeatQuizAPI.Mapping;
 using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.Keyboard;
+using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.SearchEngineRequests;
 using heatquizapp_api.Models.Series;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +16,7 @@ using System.Linq.Expressions;
 namespace heatquizapp_api.Controllers.SearchEngineController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class SearchEngineController : Controller
@@ -37,7 +39,235 @@ namespace heatquizapp_api.Controllers.SearchEngineController
         }
 
         [HttpPost("[action]")]
-        //Change in vs code -- original: SearchSeries_ADVANCED
+        public async Task<IActionResult> GetQuestions([FromBody] SearchQuestionsViewModel RequestVM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            Expression<Func<QuestionBase, bool>> Criteria = q =>
+                //Datapool
+                (RequestVM.DataPoolId == q.DataPoolId)
+                &&
+
+                //Subtopic
+                (RequestVM.Subtopic == -1 || q.SubtopicId == RequestVM.Subtopic)
+
+                &&
+                //Topic
+                (RequestVM.Topic == -1 || q.Subtopic.TopicId == RequestVM.Topic)
+
+                &&
+                //LOD
+                (RequestVM.LevelOfDifficulty == -1 || q.LevelOfDifficultyId == RequestVM.LevelOfDifficulty)
+               
+                &&
+                //Code
+                (string.IsNullOrEmpty(RequestVM.Code) || q.Code.ToLower().Contains(RequestVM.Code.ToLower()))
+
+                //Question types
+                && (!RequestVM.ShowClickableQuestions && RequestVM.SearchBasedOnQuestionTypes ? q.Type != Constants.CLICKABLE_QUESTION_PARAMETER : true)
+                && (!RequestVM.ShowKeyboardQuestions && RequestVM.SearchBasedOnQuestionTypes ? q.Type != Constants.KEYBOARD_QUESTION_PARAMETER : true)
+                && (!RequestVM.ShowMultipleChoiceQuestions && RequestVM.SearchBasedOnQuestionTypes ? q.Type != Constants.MUTLIPLE_CHOICE_QUESTION_PARAMETER : true)
+                
+
+                //Search based on median time
+                && 
+                (!RequestVM.SearchBasedOnMedianTime 
+                ||
+                (
+                (RequestVM.MedianTime1 <= (q.QuestionStatistics.OrderBy(qs => qs.TotalTime).Skip(q.QuestionStatistics.Count() / 2).FirstOrDefault().TotalTime))
+                &&
+                (RequestVM.MedianTime2 >= (q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(qs => qs.TotalTime).ToList()[q.QuestionStatistics.Count() / 2].TotalTime : int.MaxValue))
+                ))
+
+                //Search based on play stats
+                && 
+                (!RequestVM.SearchBasedOnPlayStats 
+                ||
+                (
+                q.QuestionStatistics.Any() 
+                &&
+                RequestVM.MinimumQuestionPlay <= q.QuestionStatistics.Count
+                &&
+                RequestVM.SuccessRate1 <= (100 * q.QuestionStatistics.Count(a => a.Correct) / q.QuestionStatistics.Count)
+                &&
+                RequestVM.SuccessRate2 >= (100 * q.QuestionStatistics.Count(a => a.Correct) / q.QuestionStatistics.Count)
+                ));
+
+            var CodesNumbers =  _applicationDbContext.QuestionBase
+              //.Where(Criteria)
+              .OrderBy(q => q.Code)
+              .Select(q => q.Code[0])
+              .ToList();
+
+            var Codes = new List<CodeNumberViewModel>();
+
+            foreach (var c in CodesNumbers)
+            {
+                if (Codes.Count == 0)
+                {
+                    Codes.Add(new CodeNumberViewModel()
+                    {
+                        Code = c,
+                        Number = 1
+                    });
+
+                    continue;
+                }
+
+                if (Codes.Last().Code == c)
+                {
+                    Codes.Last().Number += 1;
+                }
+                else
+                {
+                    Codes.Add(new CodeNumberViewModel()
+                    {
+                        Code = c,
+                        Number = 1
+                    });
+                }
+
+            }
+
+            var Questions = await _applicationDbContext.QuestionBase
+                 //.Where(Criteria)
+                 .Include(q => q.LevelOfDifficulty)
+                 .Include(q => q.Subtopic)
+                 .ThenInclude(s => s.Topic)
+
+                 .Include(q => q.QuestionStatistics)
+                 .Include(q => q.QuestionPDFStatistics)
+
+                 .OrderBy(q => q.Code)
+                 .Skip(RequestVM.Page * RequestVM.QperPage)
+                 .Take(RequestVM.QperPage)
+                 .Select(q => new {
+                     Id = q.Id,
+                     Code = q.Code,
+                     Type = q.Type,
+
+                     DateCreated = q.DateCreated,
+
+                     AddedByName = q.AddedBy.Name,
+
+                     ImageURL = MappingProfile.GetQuestionImageURL(q) ,
+                     PDFURL = MappingProfile.GetQuestionPDFURL(q),
+
+                     TotalGames = q.QuestionStatistics.Count,
+                     TotalCorrectGames = q.QuestionStatistics.Count(s => s.Correct),
+                     MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[(int)(q.QuestionStatistics.Count() / 2)].TotalTime : 0,
+
+                     TotalPDFViews = q.QuestionPDFStatistics.Count,
+                     TotalPDFViewsWrong = q.QuestionPDFStatistics.Count(a => !a.Correct),
+
+                     LevelOfDifficulty = new
+                     {
+                         Name = q.LevelOfDifficulty.Name,
+                         HexColor = q.LevelOfDifficulty.HexColor,
+                         Id = q.LevelOfDifficulty.Id,
+                     },
+
+                     Subtopic = new
+                     {
+                         Name = q.Subtopic.Name,
+                         Id = q.Subtopic.Id,
+                         Topic = new
+                         {
+                             Name = q.Subtopic.Topic.Name,
+                             Id = q.Subtopic.Topic.Id
+                         },
+                     },
+
+                 })
+                .ToListAsync();
+
+            var QuestionsIdsTypes = new List<KeyValuePair<int, int>>();
+
+            QuestionsIdsTypes = await _applicationDbContext.QuestionBase
+                    //.Where(Criteria)
+                    .OrderBy(q => q.Code)
+                    .Select((q) => new KeyValuePair<int, int>(q.Id, q.Type))
+                    .ToListAsync();
+
+
+            return Ok(new
+            {
+                NumberOfQuestions = CodesNumbers.Count,
+                Questions = (Questions),
+                QuestionsIdsTypes = QuestionsIdsTypes,
+                Codes = Codes,
+            });
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetQuestionsByIds([FromBody] SearchQuestionsByIdsViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
+
+            var Questions = await _applicationDbContext.QuestionBase
+                .Where(q => VM.Ids.Any(Id => Id == q.Id))
+
+                 .Include(q => q.LevelOfDifficulty)
+                 .Include(q => q.Subtopic)
+                 .ThenInclude(s => s.Topic)
+
+                 .Include(q => q.QuestionPDFStatistics)
+
+                 .OrderBy(q => q.Code)
+                 .Select(q => new {
+                     Id = q.Id,
+                     Code = q.Code,
+                     Type = q.Type,
+
+                     DateCreated = q.DateCreated,
+
+                     AddedByName = q.AddedBy.Name,
+
+                     ImageURL = MappingProfile.GetQuestionImageURL(q),
+                     PDFURL = MappingProfile.GetQuestionPDFURL(q),
+
+                     TotalGames = q.QuestionStatistics.Count,
+                     TotalCorrectGames = q.QuestionStatistics.Count(s => s.Correct),
+                     MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(qs => qs.TotalTime).ElementAt((int)(q.QuestionStatistics.Count() / 2)).TotalTime : 0,
+
+                     TotalPDFViews = q.QuestionPDFStatistics.Count,
+                     TotalPDFViewsWrong = q.QuestionPDFStatistics.Count(a => !a.Correct),
+
+                     LevelOfDifficulty = new
+                     {
+                         Name = q.LevelOfDifficulty.Name,
+                         HexColor = q.LevelOfDifficulty.HexColor,
+                         Id = q.LevelOfDifficulty.Id,
+                     },
+
+                     Subtopic = new
+                     {
+                         Name = q.Subtopic.Name,
+                         Id = q.Subtopic.Id,
+                         Topic = new
+                         {
+                             Name = q.Subtopic.Topic.Name,
+                             Id = q.Subtopic.Topic.Id
+                         },
+                     },
+                 })
+                .ToListAsync();
+
+
+            return Ok(new
+            {
+                NumberOfQuestions = VM.NumberOfQuestions,
+                Questions = (Questions),
+                QuestionsIdsTypes = VM.QuestionsIdsTypes,
+                Codes = VM.Codes,
+
+            });
+        }
+
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> SearchSeries([FromBody] SeriesSearchViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -46,8 +276,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
             Expression<Func<QuestionSeries, bool>> criteria = (s) =>
                 (
                 s.DataPoolId == VM.DataPoolId &&
-                //&&(!VM.Used ? s.MapElements.Count == 0 : true)
-                //&&
                 (
                 !string.IsNullOrEmpty(VM.Adder) ? s.AddedBy.Name == VM.Adder : true
                 ) &&
@@ -57,10 +285,10 @@ namespace heatquizapp_api.Controllers.SearchEngineController
                 );
 
             var CodesNumbers = await _applicationDbContext.QuestionSeries
-                .Where(criteria)
-               .OrderBy(q => q.Code)
-               .Select(q => q.Code[0])
-               .ToListAsync();
+                   .Where(criteria)
+                   .OrderBy(q => q.Code)
+                   .Select(q => q.Code[0])
+                   .ToListAsync();
 
             var Codes = new List<CodeNumberViewModel>();
 
@@ -94,26 +322,25 @@ namespace heatquizapp_api.Controllers.SearchEngineController
             var SeriesIds = new List<int>();
 
             SeriesIds = await _applicationDbContext.QuestionSeries
-              .Where(criteria)
-            .OrderBy(q => q.Code)
-            .Select((q) => q.Id)
-               .ToListAsync();
+                .Where(criteria)
+                .OrderBy(q => q.Code)
+                .Select((q) => q.Id)
+                .ToListAsync();
 
             var SeriesCodes = await _applicationDbContext.QuestionSeries
-                 .Where(criteria)
-                .OrderBy(q => q.Code)
-            .Select((q) => q.Code)
-               .ToListAsync();
+                    .Where(criteria)
+                    .OrderBy(q => q.Code)
+                    .Select((q) => q.Code)
+                    .ToListAsync();
 
             var Series = await _applicationDbContext.QuestionSeries
-                .Include(s => s.Elements)
-                .Include(s => s.AddedBy)
-                //.Include(s => s.MapElements)
-                //.ThenInclude(me => me.Map)
-                
-
                 .Where(criteria)
 
+                .Include(s => s.Elements)
+                .Include(s => s.AddedBy)
+                .Include(s => s.MapElements)
+                .ThenInclude(me => me.Map)
+                
                 .OrderBy(s => s.Code)
                 .Skip(VM.Page * VM.QperPage)
                 .Take(VM.QperPage)
@@ -130,7 +357,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
         }
 
         [HttpPost("[action]")]
-        //Change in vs code -- original SearchSeriesByIds_ADVANCED
         public async Task<IActionResult> SearchSeriesByIds([FromBody] SearchByIdsViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -141,8 +367,8 @@ namespace heatquizapp_api.Controllers.SearchEngineController
                 .Include(s => s.Elements)
                 .Include(s => s.AddedBy)
 
-                //.Include(s => s.MapElements)
-                //.ThenInclude(me => me.Map)
+                .Include(s => s.MapElements)
+                .ThenInclude(me => me.Map)
                 
                 .ToListAsync();
 
@@ -228,8 +454,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
                 .Take(VM.QperPage)
 
                 .ToListAsync();
-
-
 
             var Ids = await _applicationDbContext.Keyboards
               .Where(Critera)

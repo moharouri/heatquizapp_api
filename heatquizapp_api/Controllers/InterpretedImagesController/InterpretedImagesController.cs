@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.InterpretedTrees;
 using Microsoft.AspNetCore.Authorization;
@@ -10,11 +11,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static heatquizapp_api.Utilities.Utilities;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace heatquizapp_api.Controllers.InterpretedImagesController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class InterpretedImagesController : Controller
@@ -43,9 +45,8 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             return View();
         }
 
-        [HttpGet("[action]")]
+        [HttpPost("[action]")]
         [AllowAnonymous]
-        //Change name in vs code original: GetGroups
         public async Task<IActionResult> GetInterpretedTrees([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -72,8 +73,8 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
                 .Include(g => g.Images)
                 .ThenInclude(i => i.Jump)
 
-                //.Include(g => g.Images)
-                //.ThenInclude(i => i.ClickCharts)
+                .Include(g => g.Images)
+                .ThenInclude(i => i.ClickCharts)
 
                 .OrderBy(g => g.Name)
                 .Where(g => g.DataPoolId == VM.DatapoolId)
@@ -82,7 +83,7 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             return Ok(_mapper.Map<List<InterpretedImageGroup>, List<InterpretedImageGroupViewModel>>(Groups));
         }
 
-        [HttpGet("[action]")]
+        [HttpPost("[action]")]
         [AllowAnonymous]
         public async Task<IActionResult> GetValues()
         {
@@ -119,8 +120,7 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
         }
 
         [HttpPost("[action]")]
-        //Change name in vs code -- original: AddGroup
-        public async Task<IActionResult> AddTree([FromBody] InterpretedImageGroupViewModel VM)
+        public async Task<IActionResult> AddTree([FromBody] AddInterpretedImageGroupViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -160,8 +160,7 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
         }
 
         [HttpPut("[action]")]
-        //Change type and name in vs code -- original: EditGroup
-        public async Task<IActionResult> EditTree([FromBody] InterpretedImageGroupViewModel VM)
+        public async Task<IActionResult> EditTree([FromBody] UpdateInterpretedImageGroupViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -171,7 +170,7 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
                 .FirstOrDefaultAsync(g => g.Id == VM.Id);
 
             if (Tree is null)
-                return NotFound($"Tree not found");
+                return NotFound("Tree not found");
 
             //Check Name Not Null
             if (string.IsNullOrEmpty(VM.Name))
@@ -192,9 +191,8 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             return Ok(_mapper.Map<InterpretedImageGroup, InterpretedImageGroupViewModel>(Tree));
         }
 
-        [HttpDelete("[action]")]
-        //Change type
-        public async Task<IActionResult> DeleteTree([FromBody] InterpretedImageGroupViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteTree([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -202,18 +200,24 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             //Group
             var Tree = await _applicationDbContext.InterpretedImageGroups
                .Include(g => g.Images)
-               //.ThenInclude(i => i.ClickCharts)
+               .ThenInclude(i => i.ClickCharts)
                .FirstOrDefaultAsync(g => g.Id == VM.Id);
 
             if (Tree is null)
                 return NotFound($"Tree not found");
 
-            //if (Tree.Images.Any(i => i.ClickCharts.Count != 0))
-            //    return BadRequest("Tree Used in Questions, Can't Be Deleted");
+            if (Tree.Images.Any(i => i.ClickCharts.Count != 0))
+                return BadRequest("Tree used in questions, can't be deleted");
 
             //Remove
             foreach (var i in Tree.Images)
             {
+                //Try removing image
+                if (i.ImageURL != null)
+                {
+                    RemoveFile(i.ImageURL);
+                }
+
                 _applicationDbContext.InterpretedImages.Remove(i);
             }
 
@@ -316,23 +320,28 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             return Ok();
         }
 
-        [HttpPost("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> DeleteNode([FromBody] InterpretedImageViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteNode([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Image
             var Image = await _applicationDbContext.InterpretedImages
-             //.Include(i => i.ClickCharts)
+                .Include(i => i.ClickCharts)
                .FirstOrDefaultAsync(g => g.Id == VM.Id);
 
             if (Image is null)
                 return NotFound($"Group Not Found");
 
-          //if (Image.ClickCharts.Count != 0)
-          //    return BadRequest("Image Used in Questions, Can't Be Deleted");
+            if (Image.ClickCharts.Count != 0)
+              return BadRequest("Image Used in Questions, Can't Be Deleted");
+
+            //Try removing image
+            if(Image.ImageURL != null)
+            {
+                RemoveFile(Image.ImageURL); 
+            }
 
             //Remove 
             _applicationDbContext.InterpretedImages.Remove(Image);
@@ -342,34 +351,33 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> EditInterpretedImageName(int ImageId, string Code)
+        public async Task<IActionResult> EditInterpretedImageName([FromForm] UpdateInterpretedNodeViewModel VM)
         {
             //Check image exists
             var Image = await _applicationDbContext.InterpretedImages
                 .Include(i => i.Group)
                 .ThenInclude(g => g.Images)
 
-                .FirstOrDefaultAsync(i => i.Id == ImageId);
+                .FirstOrDefaultAsync(i => i.Id == VM.Id);
 
             if (Image is null)
                 return NotFound("Node not found");
 
             //Check code 
-            if (string.IsNullOrEmpty(Code))
+            if (string.IsNullOrEmpty(VM.Code))
                 return BadRequest("Code can't be empty");
 
             var Tree = Image.Group;
 
             //Check code not taken
             var codeTaken = Tree.Images
-                .Any(i => i.Code == Code && i.Id != Image.Id);
+                .Any(i => i.Code == VM.Code && i.Id != Image.Id);
 
             if (codeTaken)
                 return BadRequest("Code taken within the tree");
 
             //Update
-            Image.Code = Code;
+            Image.Code = VM.Code;
 
             await _applicationDbContext.SaveChangesAsync();
 
@@ -377,13 +385,13 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> EditInterpretedImagePicture(int ImageId, IFormFile Picture)
+        public async Task<IActionResult> EditInterpretedImagePicture([FromForm] UpdateInterpretedNodeViewModel VM)
         {
             //Check image exists
             var Image = await _applicationDbContext.InterpretedImages
                 .Include(i => i.Group)
                 .ThenInclude(g => g.Images)
-                .FirstOrDefaultAsync(i => i.Id == ImageId);
+                .FirstOrDefaultAsync(i => i.Id == VM.Id);
 
             if (Image is null)
                 return NotFound("Node not found");
@@ -391,20 +399,26 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
             var Tree = Image.Group;
 
             //Check picture
-            if (Picture is null)
+            if (VM.Picture is null)
                 return BadRequest("Please provide picture");
 
             //Verify Extension
-            var isExtensionValid = validateImageExtension(Picture);
+            var isExtensionValid = validateImageExtension(VM.Picture);
 
             if (!isExtensionValid)
                 return BadRequest("Picture extenstion not valid");
 
+            //Try removing image
+            if (Image.ImageURL != null)
+            {
+                RemoveFile(Image.ImageURL);
+            }
+
             //Save picture and generate url
-            var URL = await SaveFile(Picture);
+            var URL = await SaveFile(VM.Picture);
 
             Image.ImageURL = URL;
-            Image.Size = Picture.Length;
+            Image.Size = VM.Picture.Length;
 
             await _applicationDbContext.SaveChangesAsync();
 
@@ -412,13 +426,13 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> EditInterpretedImageValues(int ImageId, int JumpId, int LeftId, int RightId, int RatioId)
+        public async Task<IActionResult> EditInterpretedImageValues([FromForm] UpdateInterpretedNodeViewModel VM)
         {
             //Check image exists
             var Image = await _applicationDbContext.InterpretedImages
                 .Include(i => i.Group)
                 .ThenInclude(g => g.Images)
-                .FirstOrDefaultAsync(i => i.Id == ImageId);
+                .FirstOrDefaultAsync(i => i.Id == VM.Id);
 
             if (Image is null)
                 return NotFound("Node not found");
@@ -427,33 +441,33 @@ namespace heatquizapp_api.Controllers.InterpretedImagesController
 
             //Check interpretation values exist
             var Left = await _applicationDbContext.LeftGradientValues
-                .FirstOrDefaultAsync(l => l.Id == LeftId);
+                .FirstOrDefaultAsync(l => l.Id == VM.LeftId);
 
             if (Left is null)
                 return BadRequest("Interpretation value not found");
 
             var Right = await _applicationDbContext.RightGradientValues
-                .FirstOrDefaultAsync(l => l.Id == RightId);
+                .FirstOrDefaultAsync(l => l.Id == VM.RightId);
 
             if (Right is null)
                 return BadRequest("Interpretation value not found");
 
 
             var Ratio = await _applicationDbContext.RationOfGradientsValues
-                .FirstOrDefaultAsync(l => l.Id == RatioId);
+                .FirstOrDefaultAsync(l => l.Id == VM.RatioId);
 
             if (Ratio is null)
                 return BadRequest("Interpretation value not found");
 
 
             var Jump = await _applicationDbContext.JumpValues
-                .FirstOrDefaultAsync(l => l.Id == JumpId);
+                .FirstOrDefaultAsync(l => l.Id == VM.JumpId);
 
             if (Jump is null)
                 return BadRequest("Interpretation value not found");
 
             //Check if image already exists [Values]
-            if (Group.Images.Any(i => i.Id != Image.Id && (i.JumpId == JumpId && i.LeftId == LeftId && i.RightId == RightId && i.RationOfGradientsId == RatioId)))
+            if (Group.Images.Any(i => i.Id != Image.Id && (i.JumpId == VM.JumpId && i.LeftId == VM.LeftId && i.RightId == VM.RightId && i.RationOfGradientsId == VM.RatioId)))
                 return BadRequest("Values already used within the tree");
 
             //Update

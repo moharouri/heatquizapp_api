@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.Topics;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +16,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.TopicController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class TopicController : Controller
@@ -45,7 +46,6 @@ namespace heatquizapp_api.Controllers.TopicController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> GetAllTopics([FromBody] DatapoolCarrierViewModel VM)
         {
             if(!ModelState.IsValid)
@@ -65,7 +65,7 @@ namespace heatquizapp_api.Controllers.TopicController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddTopic([FromBody] TopicViewModel VM)
+        public async Task<IActionResult> AddTopic([FromBody] AddTopicViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -106,7 +106,7 @@ namespace heatquizapp_api.Controllers.TopicController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddSubtopic([FromBody] SubtopicViewModel VM)
+        public async Task<IActionResult> AddSubtopic([FromBody] AddSubtopicViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -130,7 +130,8 @@ namespace heatquizapp_api.Controllers.TopicController
             var Subtopic = new Subtopic()
             {
                 Name = VM.Name,
-                Topic = Topic
+                Topic = Topic,
+                DataPoolId = Topic.DataPoolId
             };
 
             _applicationDbContext.Subtopics.Add(Subtopic);
@@ -141,8 +142,7 @@ namespace heatquizapp_api.Controllers.TopicController
 
 
         [HttpPut("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> EditTopic([FromBody] TopicViewModel VM)
+        public async Task<IActionResult> EditTopic([FromBody] UpdateTopicViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -173,8 +173,7 @@ namespace heatquizapp_api.Controllers.TopicController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> EditSubtopic([FromBody] SubtopicViewModel VM)
+        public async Task<IActionResult> EditSubtopic([FromBody] UpdateSubtopicViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -206,9 +205,8 @@ namespace heatquizapp_api.Controllers.TopicController
         }
 
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> DeleteTopic([FromBody] TopicViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteTopic([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -232,9 +230,8 @@ namespace heatquizapp_api.Controllers.TopicController
             return Ok();
         }
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> DeleteSubtopic([FromBody] SubtopicViewModel VM)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteSubtopic([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

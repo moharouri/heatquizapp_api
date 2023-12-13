@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.ClickImageTrees;
 using heatquizapp_api.Models.InterpretedTrees;
 using heatquizapp_api.Models.Questions;
@@ -17,7 +18,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class SimpleClickableQuestionController : Controller
@@ -47,8 +48,7 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
         }
 
         [HttpPost("[action]")]
-        //Change name and type in vscode -- original: GetQuestion_APP
-        public async Task<IActionResult> GetQuestion([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestion([FromBody] UniversalAccessByIdViewModel VM)
         {
             if(!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);    
@@ -73,37 +73,17 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
             if (Question is null)
                 return NotFound("Question not found");
 
-            //Get images groups 
-            var ImageAnswerGroups = await _applicationDbContext.ImageAnswerGroups
-                .Where(g => Question.ClickImages.Any(ci => ci.Answer.GroupId == g.Id))
-                .Include(g => g.Images)
-                .ToListAsync();
-
-            foreach (var Group in ImageAnswerGroups)
-            {
-                //Get roots including leafs that include thier leafs ...... -- tree
-                var Images = Group.Images
-                    .Where(i => !i.RootId.HasValue)
-                    .ToList();
-
-                Group.Images = Images;
-            }
-
-            var InterpretedImageGroups = await _applicationDbContext.InterpretedImageGroups
-                .Where(g => Question.ClickCharts.Any(cc => cc.Answer.GroupId == g.Id))
-                .Include(g => g.Images)
-                .ToListAsync();
-
+           
             return Ok(
                 new
                 {
                     Question = _mapper.Map<SimpleClickableQuestion, SimpleClickableQuestionViewModel>(Question),
 
-                    ImageAnswerGroups = _mapper.Map<List<ImageAnswerGroup>, List<ImageAnswerGroupViewModel>>
+                    /*ImageAnswerGroups = _mapper.Map<List<ImageAnswerGroup>, List<ImageAnswerGroupViewModel>>
                     (ImageAnswerGroups),
 
                     InterpretedImageGroups = _mapper.Map<List<InterpretedImageGroup>, List<InterpretedImageGroupViewModel>>
-                    (InterpretedImageGroups)
+                    (InterpretedImageGroups)*/
                 });
         }
 
@@ -162,20 +142,25 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
 
             if (ParsedModel.ClickImages.Count == 0 && ParsedModel.ClickCharts.Count == 0)
                 return BadRequest("Please provide clickable parts");
-          
+
             //Images 
+            var UsedImagesIds = ParsedModel.ClickImages.Select(ci => ci.AnswerId);
+
             var ClickableImages = (await _applicationDbContext.ImageAnswers
-                .Where(i => ParsedModel.ClickImages.Any(ci => ci.AnswerId == i.Id) && i.DataPoolId == DP.Id)
+                .Where(i => i.DataPoolId == DP.Id && UsedImagesIds.Any(Id => Id == i.Id))
                 .ToListAsync())
                 .ToDictionary(ci => ci.Id);
 
             if (ClickableImages.Count != ParsedModel.ClickImages.GroupBy(ci => ci.AnswerId).Count())
                 return NotFound("Atleast one image answer not found");
 
-            //Charts 
+            //Charts
+            var UsedChartsIds = ParsedModel.ClickCharts.Select(ci => ci.AnswerId);
+
             var InterpretedImages = (await _applicationDbContext.InterpretedImages
-                .Where(ii => ParsedModel.ClickCharts.Any(cc => cc.AnswerId == ii.Id) && ii.DataPoolId == DP.Id)
-                .ToListAsync()).ToDictionary(ci => ci.Id);
+                .Where(ii => UsedChartsIds.Any(Id => Id == ii.Id) && ii.DataPoolId == DP.Id)
+                .ToListAsync())
+                .ToDictionary(ci => ci.Id);
 
             if (InterpretedImages.Count != ParsedModel.ClickCharts.GroupBy(cc => cc.AnswerId).Count())
                 return NotFound("Atleast one interpreted image not found");
@@ -345,10 +330,13 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddNewQuestionParts([FromForm] AddClickQuestionSingleStepViewModel QuestionVM)
+        public async Task<IActionResult> AddNewQuestionParts([FromForm] AddClickQuestionNewPartsSingleStepViewModel QuestionVM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var Question = await _applicationDbContext.SimpleClickableQuestions
-                .FirstOrDefaultAsync(q => q.Code == QuestionVM.Code);
+                .FirstOrDefaultAsync(q => q.Id == QuestionVM.Id);
 
             if (Question is null)
                 return NotFound("Question not found");
@@ -363,8 +351,10 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
                 return BadRequest("Please provide clickable parts");
 
             //Images 
+            var UsedImagesIds = ParsedModel.ClickImages.Select(ci => ci.AnswerId);
+
             var ClickableImages = (await _applicationDbContext.ImageAnswers
-                .Where(i => ParsedModel.ClickImages.Any(ci => ci.AnswerId == i.Id) && i.DataPoolId == Question.DataPoolId)
+                .Where(i => UsedImagesIds.Any(Id => Id == i.Id) && i.DataPoolId == Question.DataPoolId)
                 .ToListAsync())
                 .ToDictionary(ci => ci.Id);
 
@@ -372,8 +362,10 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
                 return NotFound("Atleast one image answer not found");
 
             //Charts 
+            var UsedChartsIds = ParsedModel.ClickCharts.Select(ci => ci.AnswerId);
+
             var InterpretedImages = (await _applicationDbContext.InterpretedImages
-                .Where(ii => ParsedModel.ClickCharts.Any(cc => cc.AnswerId == ii.Id) && ii.DataPoolId == Question.DataPoolId)
+                .Where(ii => UsedChartsIds.Any(Id => Id == ii.Id) && ii.DataPoolId == Question.DataPoolId)
                 .ToListAsync()).ToDictionary(ci => ci.Id);
 
             if (InterpretedImages.Count != ParsedModel.ClickCharts.GroupBy(cc => cc.AnswerId).Count())
@@ -387,6 +379,8 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
                 Width = ci.Width,
                 Height = ci.Height,
                 AnswerId = ci.AnswerId,
+
+                DataPoolId = Question.DataPoolId,
             }));
 
             Question.ClickCharts.AddRange(ParsedModel.ClickCharts.Select(cc => new ClickChart()
@@ -397,6 +391,8 @@ namespace heatquizapp_api.Controllers.SimpleClickableQuestionController
                 Width = cc.Width,
                 Height = cc.Height,
                 AnswerId = cc.AnswerId,
+
+                DataPoolId = Question.DataPoolId,
             }));
 
             await _applicationDbContext.SaveChangesAsync();

@@ -1,6 +1,6 @@
 ﻿namespace heatquizapp_api.Models.Questions.SimpleClickableQuestion
 {
-    public class SimpleClickableQuestionViewModel
+    public class SimpleClickableQuestionViewModel : QuestionBaseViewModel
     {
         //Clickable Images
         public List<ClickImageViewModel> ClickImages { get; set; } = new List<ClickImageViewModel>();

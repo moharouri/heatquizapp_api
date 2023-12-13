@@ -12,11 +12,12 @@ using HeatQuizAPI.Utilities;
 using static heatquizapp_api.Utilities.Utilities;
 using System;
 using heatquizapp_api.Models.Courses;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.CourseMapElementImagesController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class CourseMapElementImagesController : Controller
@@ -46,7 +47,6 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> GetAllImages([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -62,7 +62,7 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddImage([FromForm] AddMapElementImagesViewModel VM)
+        public async Task<IActionResult> AddList([FromForm] AddMapElementImagesViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -147,8 +147,8 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
             return Ok();
         }
 
+
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditCode([FromForm] UpdateMapElementImagesCodeViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -178,7 +178,6 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> EditImage([FromForm] UpdateMapElementImagesImageViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -203,10 +202,13 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
             //Save image and generate url
             var URL = await SaveFile(VM.Picture);
 
+            string toBeDeletedFile;
+
             switch (VM.EditType)
             {
                 case EDIT_TYPE.PLAY:
                     {
+                        toBeDeletedFile = bi.Play;
                         bi.Play = URL;
 
                         break;
@@ -214,6 +216,7 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
 
                 case EDIT_TYPE.PDF:
                     {
+                        toBeDeletedFile = bi.PDF;
                         bi.PDF = URL;
 
                         break;
@@ -221,6 +224,7 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
 
                 case EDIT_TYPE.VIDEO:
                     {
+                        toBeDeletedFile = bi.Video;
                         bi.Video = URL;
 
                         break;
@@ -228,6 +232,7 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
 
                 case EDIT_TYPE.LINK:
                     {
+                        toBeDeletedFile = bi.Link;
                         bi.Link = URL;
 
                         break;
@@ -239,6 +244,11 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
                     }
             }
 
+            //Try deleting the existing file
+            if(toBeDeletedFile != null)
+            {
+                RemoveFile(toBeDeletedFile); 
+            }
 
             await _applicationDbContext.SaveChangesAsync();
 
@@ -246,7 +256,6 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> SelectImageGroup([FromForm] AssignListToMapElementsViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -303,5 +312,36 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
             return Ok(_mapper.Map<CourseMapElementViewModel>(MapElement));
         }
 
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteList([FromBody] UniversalDeleteViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var bi = await _applicationDbContext.CourseMapElementImages
+                .FirstOrDefaultAsync(i => i.Id == VM.Id);
+
+            if (bi is null)
+                return BadRequest("List not found");
+
+            var ImagesList = new List<string>
+            {
+                bi.Play,
+                bi.PDF,
+                bi.Video,
+                bi.Link
+            };
+
+            //Delete existing files
+            foreach (var image in ImagesList)
+            {
+                RemoveFile(image);
+            }
+
+            _applicationDbContext.CourseMapElementImages.Remove(bi);
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }

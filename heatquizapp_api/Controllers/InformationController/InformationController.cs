@@ -11,6 +11,7 @@ using HeatQuizAPI.Utilities;
 using Microsoft.EntityFrameworkCore;
 using heatquizapp_api.Models.Questions;
 using static heatquizapp_api.Utilities.Utilities;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.InformationController
 {
@@ -328,7 +329,24 @@ namespace heatquizapp_api.Controllers.InformationController
             return Ok();
         }
 
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteInfo([FromBody] UniversalDeleteViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
+            //Check it exists
+            var Info = await _applicationDbContext.Information
+               .FirstOrDefaultAsync(i => i.Id == VM.Id);
+
+            if (Info is null)
+                return BadRequest("Data not found");
+
+            _applicationDbContext.Information.Remove(Info);
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
 
     }
 }

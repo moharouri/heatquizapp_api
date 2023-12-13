@@ -8,15 +8,13 @@ namespace heatquizapp_api.Models.ClickImageTrees
     {
         public string Name { get; set; }
 
-        public bool Choosable { get; set; }
-
         //Image
         public string ImageURL { get; set; }
         public long Size { get; set; }
 
         //Group 
         public ImageAnswerGroup Group { get; set; }
-        public int GroupId { get; set; }
+        public int? GroupId { get; set; }
 
         //Root 
         public ImageAnswer Root { get; set; }

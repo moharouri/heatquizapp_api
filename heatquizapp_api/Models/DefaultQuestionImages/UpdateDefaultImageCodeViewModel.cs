@@ -1,6 +1,6 @@
 ﻿namespace heatquizapp_api.Models.DefaultQuestionImages
 {
-    public class UpdateDeleteDefaultImageCodeViewModel
+    public class UpdateDefaultImageCodeViewModel
     {
         public int Id { get; set; }
         public string? Code { get; set; }

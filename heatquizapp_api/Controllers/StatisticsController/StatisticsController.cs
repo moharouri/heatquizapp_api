@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.Courses;
 using heatquizapp_api.Models.Questions;
@@ -15,7 +16,7 @@ using System.Linq.Expressions;
 namespace heatquizapp_api.Controllers.StatisticsController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class StatisticsController : Controller
@@ -38,8 +39,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
         }
 
         [HttpPost("[action]")]
-        //Change type and location
-        public async Task<IActionResult> GetQuestionStatistics([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestionStatistics([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -97,8 +97,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
         }
 
         [HttpPost("[action]")]
-        //Original GetSeriesElementStatistics_EXTENDED
-        public async Task<IActionResult> GetSeriesStatistics([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> GetSeriesStatistics([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -161,12 +160,11 @@ namespace heatquizapp_api.Controllers.StatisticsController
             }
 
             var SeriesStats = await _applicationDbContext.QuestionSeries
+                .Where(s => s.Id == VM.Id)
 
                 .Include(s => s.Elements)
                 .ThenInclude(e => e.Question)
                 .ThenInclude(q => q.QuestionStatistics)
-
-                .Where(s => s.Id == VM.Id)
 
                 .Select(queryExpression)
                 .FirstOrDefaultAsync();
@@ -175,8 +173,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
         }
 
         [HttpPost("[action]")]
-        //Change name in vs code -- original GetQuestionStatisticDetailed
-        public async Task<IActionResult> GetQuestionMedianTimeSpectrum([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestionMedianTimeSpectrum([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -268,7 +265,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
 
         [HttpPost("[action]")]
         //Change name in vs code -- original GetSeriesStatisticDetailed
-        public async Task<IActionResult> GetSeriesMedianTimeSpectrum([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> GetSeriesMedianTimeSpectrum([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -350,7 +347,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
 
         [HttpPost("[action]")]
         //change type, name and position original: GetCourseMapStatisticsById_PORTAL
-        public async Task<IActionResult> GetCourseMapStatisticsById([FromBody] CourseMapViewModel VM)
+        public async Task<IActionResult> GetCourseMapStatisticsById([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

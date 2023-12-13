@@ -4,6 +4,7 @@ using HeatQuizAPI.Models.LevelsOfDifficulty;
 using heatquizapp_api.Models.Auxillary;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.ClickImageTrees;
+using heatquizapp_api.Models.CourseMapElementImages;
 using heatquizapp_api.Models.Courses;
 using heatquizapp_api.Models.DefaultQuestionImages;
 using heatquizapp_api.Models.InterpretedTrees;
@@ -23,9 +24,14 @@ namespace HeatQuizAPI.Mapping
     {
         public const string FILES_PATH = "http://localhost:5000/Files/";//
 
-        public static string GetQuestionImageURL<S>(S q) where S : IImageCarrier
+        public static string GetQuestionImageURL(QuestionBase q)  
         {
             return (q.ImageURL != null ? $"{FILES_PATH}/{q.ImageURL}" : "");
+        }
+
+        public static string GetQuestionPDFURL(QuestionBase q)
+        {
+            return (q.PDFURL != null ? $"{FILES_PATH}/{q.PDFURL}" : "");
         }
 
         public static string GetUserProfilePictureURL<S>(S u) where S : User
@@ -51,6 +57,11 @@ namespace HeatQuizAPI.Mapping
         private void mapProfilePicture(IMemberConfigurationExpression<QuestionComment, QuestionCommentViewModel, string> opt)
         {
             opt.MapFrom(c => c.AddedBy.ProfilePicture != null ? $"{FILES_PATH}/{c.AddedBy.ProfilePicture}" : null);
+        }
+
+        private string? mapAnyProperty(string value)
+        {
+            return value != null ? $"{FILES_PATH}/{value}" : null;
         }
 
         public MappingProfile() {
@@ -84,6 +95,7 @@ namespace HeatQuizAPI.Mapping
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
 
             CreateMap<QuestionSeriesElement, QuestionSeriesElementViewModel>();
+
             //Keyboard
             CreateMap<Keyboard, KeyboardViewModel>()
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
@@ -119,7 +131,11 @@ namespace HeatQuizAPI.Mapping
                 .ForMember(vm => vm.AddedByName, opt => opt.MapFrom(t => t.User.Name));
 
             //Clickable question 
-            CreateMap<SimpleClickableQuestion, SimpleClickableQuestionViewModel>();
+            CreateMap<SimpleClickableQuestion, SimpleClickableQuestionViewModel>()
+                .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt));
+
             CreateMap<ClickImage, ClickImageViewModel>();
             CreateMap<ClickChart, ClickChartViewModel>();
 
@@ -173,6 +189,14 @@ namespace HeatQuizAPI.Mapping
 
             CreateMap<CourseMapBadgeSystemEntity, CourseMapBadgeSystemEntityViewModel>()
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));
+
+            //Map pop-up icons
+            CreateMap<CourseMapElementImages, CourseMapElementImagesViewModel>()
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
+                .ForMember(vm => vm.PDF, opt => opt.MapFrom(v => mapAnyProperty(v.PDF)))
+                .ForMember(vm => vm.Play, opt => opt.MapFrom(v => mapAnyProperty(v.Play)))
+                .ForMember(vm => vm.Link, opt => opt.MapFrom(v => mapAnyProperty(v.Link)))
+                .ForMember(vm => vm.Video, opt => opt.MapFrom(v => mapAnyProperty(v.Video)));
 
             //Default question image
             CreateMap<DefaultQuestionImage, DefaultQuestionImageViewModel>()

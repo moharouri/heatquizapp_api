@@ -6,7 +6,6 @@ namespace heatquizapp_api.Models.Topics
     public class SubtopicViewModel : BaseEntityViewModel
     {
         public string Name { get; set; }
-        public bool Active { get; set; }
 
         public int TopicId { get; set; }
         public TopicViewModel Topic { get; set; }

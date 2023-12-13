@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using HeatQuizAPI.Utilities;
 using static heatquizapp_api.Utilities.Utilities;
 using System.Reflection.Emit;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 {
@@ -116,7 +117,7 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 
         [HttpPut("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> EditCode([FromForm] UpdateDeleteDefaultImageCodeViewModel VM)
+        public async Task<IActionResult> EditCode([FromForm] UpdateDefaultImageCodeViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -146,7 +147,7 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 
         [HttpPut("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> EditImage([FromForm] UpdateDeleteDefaultImageCodeViewModel VM)
+        public async Task<IActionResult> EditImage([FromForm] UpdateDefaultImageCodeViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -185,7 +186,7 @@ namespace heatquizapp_api.Controllers.DefaultQuestionImageController
 
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> DeleteImage([FromBody] UpdateDeleteDefaultImageCodeViewModel VM)
+        public async Task<IActionResult> DeleteImage([FromBody] UniversalDeleteViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
