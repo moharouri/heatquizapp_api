@@ -204,7 +204,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
                         Code = r.Question.Code,
                         Type = r.Question.Type,
                         Id = r.Question.Id,
-                        Base_ImageURL = MappingProfile.GetQuestionImageURL(r.Question)
+                        Base_ImageURL = MappingProfile.GetGeneralImageURL(r.Question)
                     }
                 })
                 .OrderByDescending(a => a.DateCreated)

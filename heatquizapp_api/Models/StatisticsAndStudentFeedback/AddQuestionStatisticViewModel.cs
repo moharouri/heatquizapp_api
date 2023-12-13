@@ -9,10 +9,10 @@
 
         public bool Correct { get; set; }
 
-        public string Key { get; set; }
+        public string? Key { get; set; }
         public string Player { get; set; }
 
         //For keyboard question
-        public string Latex { get; set; }
+        public string? Latex { get; set; }
     }
 }

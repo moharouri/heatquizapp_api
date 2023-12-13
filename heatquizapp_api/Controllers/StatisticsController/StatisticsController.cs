@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace heatquizapp_api.Controllers.StatisticsController
@@ -58,10 +59,11 @@ namespace heatquizapp_api.Controllers.StatisticsController
                     WrongPlay = q.QuestionStatistics.Count(s => !s.Correct && s.DateCreated >= startDate),
 
                     MedianPlayTime = q.QuestionStatistics.Any(s => s.DateCreated >= startDate) ? q.QuestionStatistics.Where(s =>  s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(s => s.DateCreated >= startDate) / 2].TotalTime : 0,
-
                     MedianPlayTimeWrong = q.QuestionStatistics.Any(s => !s.Correct) ? q.QuestionStatistics.Where(s => !s.Correct && s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => !a.Correct && a.DateCreated >= startDate) / 2].TotalTime : 0,
-
                     MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct && s.DateCreated >= startDate).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct && a.DateCreated >= startDate) / 2].TotalTime : 0,
+
+                    TotalPDFViews = q.QuestionPDFStatistics.Count(s => s.DateCreated >= startDate),
+                    TotalPDFViewsWrong = q.QuestionPDFStatistics.Count(a => !a.Correct && a.DateCreated >= startDate),
                 };
             }
             else
@@ -74,16 +76,18 @@ namespace heatquizapp_api.Controllers.StatisticsController
                     WrongPlay = q.QuestionStatistics.Count(s => !s.Correct),
 
                     MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count() / 2].TotalTime : 0,
-
                     MedianPlayTimeWrong = q.QuestionStatistics.Any(s => !s.Correct) ? q.QuestionStatistics.Where(s => !s.Correct).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => !a.Correct) / 2].TotalTime : 0,
-
                     MedianPlayTimeCorrect = q.QuestionStatistics.Any(s => s.Correct) ? q.QuestionStatistics.Where(s => s.Correct).OrderBy(a => a.TotalTime).ToList()[q.QuestionStatistics.Count(a => a.Correct) / 2].TotalTime : 0,
+
+                    TotalPDFViews = q.QuestionPDFStatistics.Count,
+                    TotalPDFViewsWrong = q.QuestionPDFStatistics.Count(a => !a.Correct),
                 };
             }
 
             //Get Question & Stats
             var Question = await _applicationDbContext.QuestionBase
                 .Include(q => q.QuestionStatistics)
+                .Include(q => q.QuestionPDFStatistics)
 
                 .Where(q => q.Id == VM.Id)
 
@@ -112,11 +116,10 @@ namespace heatquizapp_api.Controllers.StatisticsController
                 {
                     Code = s.Code,
                     Id = s.Id,
-
                     TotalPlay = s.Statistics.Count,
                     TotalPlayOnMobile = s.Statistics.Count(a => a.OnMobile),
 
-                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : 0,
+                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).ToList()[(int)(s.Statistics.Count() / 2)].TotalTime : 0,
 
                     ElementStats = s.Elements
                     .OrderBy(e => e.Order)
@@ -128,6 +131,7 @@ namespace heatquizapp_api.Controllers.StatisticsController
                         TotalSuccessPlay = e.Question.QuestionStatistics.Count(st => st.Correct),
 
                         MedianPlayTime = e.Question.QuestionStatistics.Any() ? e.Question.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[e.Question.QuestionStatistics.Count() / 2].TotalTime : 0,
+
                     })
 
                 };
@@ -139,10 +143,10 @@ namespace heatquizapp_api.Controllers.StatisticsController
                     Code = s.Code,
                     Id = s.Id,
 
-                    TotalPlay = s.Statistics.Count,
-                    TotalPlayOnMobile = s.Statistics.Count(a => a.OnMobile),
+                    TotalPlay = s.Statistics.Count(s => s.DateCreated >= startDate),
+                    TotalPlayOnMobile = s.Statistics.Count(s => s.OnMobile && s.DateCreated >= startDate),
 
-                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : 0,
+                    MedianPlayTime = s.Statistics.Any(s => s.DateCreated >= startDate) ? s.Statistics.OrderBy(a => a.TotalTime).ToList()[(int)(s.Statistics.Count(s => s.DateCreated >= startDate) / 2)].TotalTime : 0,
 
                     ElementStats = s.Elements
                     .OrderBy(e => e.Order)
@@ -153,11 +157,15 @@ namespace heatquizapp_api.Controllers.StatisticsController
                         TotalPlay = e.Question.QuestionStatistics.Count,
                         TotalSuccessPlay = e.Question.QuestionStatistics.Count(st => st.Correct),
 
-                        MedianPlayTime = e.Question.QuestionStatistics.Any() ? e.Question.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[e.Question.QuestionStatistics.Count() / 2].TotalTime : 0,
+                        MedianPlayTime = e.Question.QuestionStatistics.Any(s => s.DateCreated >= startDate) ? e.Question.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[e.Question.QuestionStatistics.Count(s => s.DateCreated >= startDate) / 2].TotalTime : 0,
+
                     })
 
                 };
             }
+
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             var SeriesStats = await _applicationDbContext.QuestionSeries
                 .Where(s => s.Id == VM.Id)
@@ -264,7 +272,6 @@ namespace heatquizapp_api.Controllers.StatisticsController
         }
 
         [HttpPost("[action]")]
-        //Change name in vs code -- original GetSeriesStatisticDetailed
         public async Task<IActionResult> GetSeriesMedianTimeSpectrum([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -280,14 +287,13 @@ namespace heatquizapp_api.Controllers.StatisticsController
                 {
                     Id = s.Id,
 
-                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).Skip(s.Statistics.Count / 2).FirstOrDefault().TotalTime : '-',
+                    MedianPlayTime = s.Statistics.Any() ? s.Statistics.OrderBy(a => a.TotalTime).ToList()[(int)(s.Statistics.Count() / 2)].TotalTime : 0,
 
                     AvgPlayTime = s.Statistics.Any() ? s.Statistics.Sum(a => a.TotalTime) / s.Statistics.Count : '-',
 
-                    MedianPlayTimeMobile = s.Statistics.Any(s => s.OnMobile) ? s.Statistics.Where(s => s.OnMobile).OrderBy(s => s.TotalTime).Skip(s.Statistics.Where(s => s.OnMobile).Count() / 2).FirstOrDefault().TotalTime : '-',
+                    MedianPlayTimeMobile = s.Statistics.Any(s => s.OnMobile) ? s.Statistics.OrderBy(a => a.TotalTime).ToList()[(int)(s.Statistics.Count(s => s.OnMobile) / 2)].TotalTime : 0,
 
                     AvgPlayTimeMobile = s.Statistics.Any(s => s.OnMobile) ? s.Statistics.Where(s => s.OnMobile).Sum(a => a.TotalTime) / s.Statistics.Where(s => s.OnMobile).Count() : '-',
-
 
                     TimeSpectrum = s.Statistics
                     .GroupBy(a => a.TotalTime)

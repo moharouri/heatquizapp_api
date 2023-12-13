@@ -94,7 +94,7 @@ namespace heatquizapp_api.Controllers.LevelOfDifficultyController
 
                     DateCreated = q.DateCreated,
 
-                    ImageURL = MappingProfile.GetQuestionImageURL(q),
+                    ImageURL = MappingProfile.GetGeneralImageURL(q),
 
                     Subtopic = new
                     {

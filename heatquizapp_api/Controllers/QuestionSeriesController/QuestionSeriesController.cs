@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.Series;
 using Microsoft.AspNetCore.Authorization;
@@ -43,32 +44,13 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             return View();
         }
 
-        [HttpGet("[action]/{Code}")]
-        public async Task<IActionResult> GetSeries(string Code)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetSeriesExtended([FromBody] UniversalAccessByCodeViewModel VM)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
             var Series = await _applicationDbContext.QuestionSeries
-
-                .Include(s => s.Elements)
-                .ThenInclude(e => e.Question)
-                .ThenInclude(q => q.Information)
-
-                .FirstOrDefaultAsync(s => s.Code == Code);
-
-            if (Series is null)
-                return NotFound("Not found");
-
-            //Send elements in order
-            Series.Elements = Series.Elements.OrderBy(e => e.Order).ToList();
-
-            return Ok(_mapper.Map<QuestionSeries, QuestionSeriesViewModel>(Series));
-        }
-
-        [HttpGet("[action]/{Code}")]
-        //Change its name in vs code
-        public async Task<IActionResult> GetSeriesExtended(string Code)
-        {
-            var Series = await _applicationDbContext.QuestionSeries
-
 
                 .Include(s => s.Elements)
                 .ThenInclude(e => e.Question)
@@ -79,11 +61,11 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
                 .ThenInclude(q => q.Subtopic)
                 .ThenInclude(st => st.Topic)
 
-                /*.Include(s => s.MapElements)
+                .Include(s => s.MapElements)
                 .ThenInclude(me => me.Map)
-                .ThenInclude(m => m.Course)*/
+                .ThenInclude(m => m.Course)
 
-                .FirstOrDefaultAsync(s => s.Code == Code);
+                .FirstOrDefaultAsync(s => s.Code == VM.Code);
 
             if (Series is null)
                 return NotFound("Not Found");
@@ -95,6 +77,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
 
             return Ok(_mapper.Map<QuestionSeries, QuestionSeriesViewModel>(Series));
         }
+
 
         [HttpPost("[action]")]
         public async Task<IActionResult> GetSeriesAdders([FromBody] DatapoolCarrierViewModel VM)
@@ -114,10 +97,10 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddSeries([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> AddSeries([FromBody] AddQuestionSeriesViewModel VM)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid Data");
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Check datapool exists
             var DP = await _applicationDbContext.DataPools
@@ -134,8 +117,10 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
                 return BadRequest("Code exists a choose different code");
 
             //Check questions exist
+            var ElementIds = VM.Elements.Select(e => e.QuestionId).ToList();
+
             var Questions = await _applicationDbContext.QuestionBase
-                .Where(q => VM.Elements.Any(e => e.QuestionId == q.Id) && q.DataPoolId == DP.Id)
+                .Where(q => ElementIds.Any(Id => Id == q.Id) && q.DataPoolId == DP.Id)
                 .ToListAsync();
 
             if (Questions.Count != VM.Elements.Count)
@@ -183,7 +168,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddSeriesElements([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> AddSeriesElements([FromBody] ReorderAssignDeselectQuestionSeriesElementsViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -191,30 +176,33 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             //Check series exists
             var Series = await _applicationDbContext.QuestionSeries
                 .Include(s => s.Elements)
-                 .FirstOrDefaultAsync(s => s.Id == VM.Id);
+                 .FirstOrDefaultAsync(s => s.Id == VM.SeriesId);
 
             if (Series is null)
                 return NotFound("Series not found");
 
             //Check questions already included
-            if (Series.Elements.Any(e =>VM.Elements.Any(evm => evm.QuestionId == e.QuestionId)))
+            if (Series.Elements.Any(e =>VM.Questions.Any(evm => evm.QuestionId == e.QuestionId)))
                 return NotFound("Some questions are already included");
 
+            var SelectedQuestionIds = VM.Questions.Select(e => e.QuestionId).ToList();
+
             var Questions = await _applicationDbContext.QuestionBase
-                .Where(q => VM.Elements.Any(e => e.QuestionId == q.Id) && q.DataPoolId == Series.DataPoolId)
+                .Where(q => SelectedQuestionIds.Any(Id => Id == q.Id) && q.DataPoolId == Series.DataPoolId)
                 .ToListAsync();
 
-            if (Questions.Count != VM.Elements.Count)
+            if (Questions.Count != VM.Questions.Count)
                 return BadRequest("Some questions do not exist");
 
             //Add elements
             var Elements = new List<QuestionSeriesElement>();
 
-            foreach (var e in VM.Elements.OrderBy(e => e.Order))
+            foreach (var e in VM.Questions.OrderBy(e => e.Order))
             {
                 var element = new QuestionSeriesElement()
                 {
-                    Order = e.Order + Series.Elements.Count
+                    Order = e.Order + Series.Elements.Count,
+                    DataPoolId = Series.DataPoolId,
                 };
 
                 element.QuestionId = e.QuestionId;
@@ -232,8 +220,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
         }
 
         [HttpPut("[action]")]
-        //Change api type, change name in vs code -- original: EditSeriesCode
-        public async Task<IActionResult> EditSeriesInfo([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> EditSeriesInfo([FromBody] UpdateSeriesInfoViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -317,8 +304,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
         }
 
         [HttpPut("[action]")]
-        //Change api type
-        public async Task<IActionResult> DeselectElementSeries([FromBody] QuestionSeriesElementViewModel VM)
+        public async Task<IActionResult> DeselectElementSeries([FromBody] ReorderAssignDeselectQuestionSeriesElementsViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -327,10 +313,10 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             var Element = await _applicationDbContext.QuestionSeriesElement
                 .Include(e => e.Series)
                 .ThenInclude(s => s.Elements)
-                .FirstOrDefaultAsync(e => e.Id == VM.Id);
+                .FirstOrDefaultAsync(e => VM.ElementId == e.Id);
 
             if (Element is null)
-                return NotFound("Not Found");
+                return NotFound("Element not found");
 
             //Check removal possibility
             var Series = Element.Series;
@@ -351,7 +337,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
 
         [HttpPut("[action]")]
         //Change api type
-        public async Task<IActionResult> DecreasePoolsNumber([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> DecreasePoolsNumber([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -384,7 +370,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
 
         [HttpPut("[action]")]
         //Change api type
-        public async Task<IActionResult> IncreasePoolsNumber([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> IncreasePoolsNumber([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -406,7 +392,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
 
         [HttpPut("[action]")]
         //Change api type
-        public async Task<IActionResult> RearrangeSeries([FromBody] QuestionSeriesViewModel VM)
+        public async Task<IActionResult> RearrangeSeries([FromBody] ReorderAssignDeselectQuestionSeriesElementsViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -414,7 +400,7 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             //Check series exists
             var Series = await _applicationDbContext.QuestionSeries
                 .Include(s => s.Elements)
-                .FirstOrDefaultAsync(s => s.Id == VM.Id);
+                .FirstOrDefaultAsync(s => s.Id == VM.SeriesId);
 
             if (Series is null)
                 return NotFound("Series not found");

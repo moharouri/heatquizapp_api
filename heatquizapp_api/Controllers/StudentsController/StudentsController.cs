@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using static heatquizapp_api.Utilities.Utilities;
 using heatquizapp_api.Models.BaseModels;
 using heatquizapp_api.Models.Series;
+using Microsoft.AspNetCore.Authorization;
 
 namespace heatquizapp_api.Controllers.StudentsController
 {
@@ -56,10 +57,13 @@ namespace heatquizapp_api.Controllers.StudentsController
 
                 .Include(q => q.ClickImages)
                 .ThenInclude(ci => ci.Answer)
+                .ThenInclude(ci => ci.Root)
+
+                .Include(q => q.ClickImages)
+                .ThenInclude(ci => ci.Answer)
 
                 .Include(q => q.ClickCharts)
                 .ThenInclude(cc => cc.Answer)
-                .ThenInclude(a => a.Jump)
 
                 .Include(q => q.Information)
 
@@ -68,24 +72,24 @@ namespace heatquizapp_api.Controllers.StudentsController
             if (Question is null)
                 return NotFound("Question not found");
 
-            //Get images groups 
+
+            Question.ClickImages = Question.ClickImages.OrderBy(a => a.Id).ToList();
+            Question.ClickCharts = Question.ClickCharts.OrderBy(a => a.Id).ToList();
+
+            //Click trees
+            var UsedClickTreesIds = Question.ClickImages.Where(a => a.Answer.GroupId.HasValue).Select(i => i.Answer.GroupId).ToList();
+            UsedClickTreesIds.AddRange(Question.ClickImages.Where(a => a.Answer.RootId.HasValue).Select(i => i.Answer.Root.GroupId).ToList());
+
             var ImageAnswerGroups = await _applicationDbContext.ImageAnswerGroups
-                .Where(g => Question.ClickImages.Any(ci => ci.Answer.GroupId == g.Id))
+                .Where(g => UsedClickTreesIds.Any(Id => Id == g.Id))
                 .Include(g => g.Images)
                 .ToListAsync();
 
-            foreach (var Group in ImageAnswerGroups)
-            {
-                //Get roots including leafs that include thier leafs ...... -- tree
-                var Images = Group.Images
-                    .Where(i => !i.RootId.HasValue)
-                    .ToList();
-
-                Group.Images = Images;
-            }
+            //Interpreted trees
+            var UsedChartTreesIds = Question.ClickCharts.Select(i => i.Answer.GroupId).ToList();
 
             var InterpretedImageGroups = await _applicationDbContext.InterpretedImageGroups
-                .Where(g => Question.ClickCharts.Any(cc => cc.Answer.GroupId == g.Id))
+                .Where(g => UsedChartTreesIds.Any(Id => Id == g.Id))
                 .Include(g => g.Images)
                 .ToListAsync();
 
@@ -94,11 +98,9 @@ namespace heatquizapp_api.Controllers.StudentsController
                 {
                     Question = _mapper.Map<SimpleClickableQuestion, SimpleClickableQuestionViewModel>(Question),
 
-                    ImageAnswerGroups = _mapper.Map<List<ImageAnswerGroup>, List<ImageAnswerGroupViewModel>>
-                    (ImageAnswerGroups),
+                    ClickTrees = _mapper.Map<List<ImageAnswerGroup>, List<ImageAnswerGroupViewModel>>(ImageAnswerGroups),
 
-                    InterpretedImageGroups = _mapper.Map<List<InterpretedImageGroup>, List<InterpretedImageGroupViewModel>>
-                    (InterpretedImageGroups)
+                    ChartTrees = _mapper.Map<List<InterpretedImageGroup>, List<InterpretedImageGroupViewModel>>(InterpretedImageGroups)
                 });
         }
 
@@ -205,7 +207,7 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddQuestionStatistic([FromForm] AddQuestionStatisticViewModel VM)
+        public async Task<IActionResult> AddQuestionStatistic([FromBody] AddQuestionStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -244,7 +246,7 @@ namespace heatquizapp_api.Controllers.StudentsController
                     _applicationDbContext.UserLinkedPlayerKeys.Add(new UserLinkedPlayerKey()
                     {
                         PlayerKey = player_key,
-                        User = registered_user,
+                        UserId = registered_user.Id,
                         DateCreated = DateTime.Now
                     });
                 }
@@ -275,7 +277,7 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddQuestionPDFStatistic([FromForm] AddQuestionPDFStatisticViewModel VM)
+        public async Task<IActionResult> AddQuestionPDFStatistic([FromBody] AddQuestionPDFStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -292,6 +294,7 @@ namespace heatquizapp_api.Controllers.StudentsController
             {
                 Player = VM.Player,
                 Correct = VM.Correct,
+                DataPoolId = question.DataPoolId
 
             });
 
@@ -301,7 +304,44 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
         [HttpPost("[action]")]
-        //Change position controller-wise, change name
+        [AllowAnonymous]
+        public async Task<IActionResult> AddStudentFeedback([FromForm] AddQuestionFeedbackViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var Question = await _applicationDbContext.QuestionBase
+                .Include(q => q.StudentFeedback)
+                .FirstOrDefaultAsync(q => q.Id == VM.QuestionId);
+
+            if (Question is null)
+                return NotFound("Question not found");
+
+
+            if (string.IsNullOrEmpty(VM.Feedback) || VM.Feedback.Length > 500)
+                return BadRequest("Please provide proper feedback");
+
+            var player_exists = await _applicationDbContext.QuestionStatistic
+                .AnyAsync(s => s.Player == VM.Player);
+
+            if (!player_exists)
+                return BadRequest("Player never played a game");
+
+            var feedback = new QuestionStudentFeedback()
+            {
+                Player = VM.Player,
+                QuestionId = Question.Id,
+                FeedbackContent = VM.Feedback,
+                DataPoolId = Question.DataPoolId
+            };
+
+            _applicationDbContext.QuestionStudentFeedback.Add(feedback);
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok("Success");
+        }
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> AddSeriesStatistic([FromForm] AddSeriesStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -332,6 +372,8 @@ namespace heatquizapp_api.Controllers.StudentsController
 
             return Ok();
         }
+
+
 
         [HttpPost("[action]")]
         //Change name and position controller-wise -- original: AddPDFStatistic

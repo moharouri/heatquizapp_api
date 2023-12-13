@@ -24,7 +24,7 @@ namespace HeatQuizAPI.Mapping
     {
         public const string FILES_PATH = "http://localhost:5000/Files/";//
 
-        public static string GetQuestionImageURL(QuestionBase q)  
+        public static string GetGeneralImageURL<T>(T q) where T : IImageCarrier
         {
             return (q.ImageURL != null ? $"{FILES_PATH}/{q.ImageURL}" : "");
         }
@@ -94,7 +94,8 @@ namespace HeatQuizAPI.Mapping
             CreateMap<QuestionSeries, QuestionSeriesViewModel>()
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt));
 
-            CreateMap<QuestionSeriesElement, QuestionSeriesElementViewModel>();
+            CreateMap<QuestionSeriesElement, QuestionSeriesElementViewModel>(); 
+            CreateMap<QuestionSeriesStatistic, QuestionSeriesStatisticViewModel>(); 
 
             //Keyboard
             CreateMap<Keyboard, KeyboardViewModel>()
@@ -140,7 +141,10 @@ namespace HeatQuizAPI.Mapping
             CreateMap<ClickChart, ClickChartViewModel>();
 
             //Multiple choice question 
-            CreateMap<MultipleChoiceQuestion, MultipleChoiceQuestionViewModel>();
+            CreateMap<MultipleChoiceQuestion, MultipleChoiceQuestionViewModel>()
+            .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt));
 
             CreateMap<MultipleChoiceQuestionChoice, MultipleChoiceQuestionChoiceViewModel>()
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));

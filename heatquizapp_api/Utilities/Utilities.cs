@@ -73,8 +73,10 @@ namespace heatquizapp_api.Utilities
             //Add file to path
             var path = Path.Combine("wwwroot/Files", fileName + FileExtension);
 
+            var sourcePathDeep = Path.Combine("wwwroot/Files", sourcePath);
+
             //Save file
-            using (Stream source = File.Open(sourcePath, FileMode.Open))
+            using (Stream source = File.Open(sourcePathDeep, FileMode.Open))
             {
                 using (Stream destination = File.Create(path))
                 {

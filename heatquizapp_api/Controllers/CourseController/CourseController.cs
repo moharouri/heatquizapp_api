@@ -206,6 +206,12 @@ namespace heatquizapp_api.Controllers.CourseController
                 if (!extensionIsValid)
                     return BadRequest("Picture extenstion not valid");
 
+                //Try delete existing image
+                if(Course.ImageURL != null)
+                {
+                    RemoveFile(Course.ImageURL);    
+                }
+
                 //Save picture and url path for it
                 var URL = await SaveFile(VM.Picture);
 

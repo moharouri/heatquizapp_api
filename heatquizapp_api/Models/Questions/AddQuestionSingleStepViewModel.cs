@@ -7,7 +7,8 @@
         public int SubtopicId { get; set; }
         public int LODId { get; set; }
 
-        public IFormFile Picture { get; set; }
+        //It can be replaced with default images
+        public IFormFile? Picture { get; set; }
         public int PictureWidth { get; set; }
         public int PictureHeight { get; set; }
 

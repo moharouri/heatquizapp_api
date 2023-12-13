@@ -1,5 +1,6 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Mapping;
+using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
 using heatquizapp_api.Models.Reports;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ using System.Globalization;
 namespace heatquizapp_api.Controllers.ReportsController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class ReportsController : Controller
@@ -153,7 +154,7 @@ namespace heatquizapp_api.Controllers.ReportsController
                     QuestionCode = g.Key.Code,
                     Type = g.Key.Type,
 
-                    QuestionImage = MappingProfile.GetQuestionImageURL(g.Key),
+                    QuestionImage = MappingProfile.GetGeneralImageURL(g.Key),
 
                     TotalGames = g.Count(),
                     TotalGamesCorrect = g.Count(s => s.Correct),
@@ -166,7 +167,7 @@ namespace heatquizapp_api.Controllers.ReportsController
                     QuestionCode = g.Key.Code,
                     Type = g.Key.Type,
 
-                    QuestionImage = MappingProfile.GetQuestionImageURL(g.Key),
+                    QuestionImage = MappingProfile.GetGeneralImageURL(g.Key),
 
                     TotalGames = g.Count(),
                     TotalGamesIncorrect = g.Count(s => !s.Correct),
@@ -239,6 +240,11 @@ namespace heatquizapp_api.Controllers.ReportsController
                 }),
 
                 MapPDFStasticsUniqueMapCount = MapPDFStatistics.GroupBy(s => s.Element.Map).Count(),
+
+                To = To.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                From = From.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+
+                DataPoolId = VM.SearchDatapoolId
 
             });
         }
@@ -368,7 +374,7 @@ namespace heatquizapp_api.Controllers.ReportsController
                     QuestionType = s.Question.Type,
                     QuestionCode = s.Question.Code,
 
-                    ImageURL = MappingProfile.GetQuestionImageURL(s.Question),
+                    ImageURL = MappingProfile.GetGeneralImageURL(s.Question),
 
                     DateCreated = s.DateCreated,
 

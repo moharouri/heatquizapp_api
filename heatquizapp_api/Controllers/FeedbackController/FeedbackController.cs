@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.StatisticsAndStudentFeedback;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +18,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.FeedbackController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [Authorize]
     [ApiController]
     public class FeedbackController : Controller
@@ -115,7 +116,7 @@ namespace heatquizapp_api.Controllers.FeedbackController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> GetQuestionFeedback([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestionFeedback([FromBody] UniversalAccessByIdViewModel VM)
         {
             if(!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -131,43 +132,5 @@ namespace heatquizapp_api.Controllers.FeedbackController
             return Ok(_mapper.Map<List<QuestionStudentFeedbackViewModel>>(Question.StudentFeedback.OrderByDescending(f => f.DateCreated)));
         }
 
-        //Allow unregistered users (players) to send feedback
-        [HttpPost("[action]")]
-        [AllowAnonymous]
-        public async Task<IActionResult> AddStudentFeedback([FromForm] AddQuestionFeedbackViewModel VM)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
-
-            var Question = await _applicationDbContext.QuestionBase
-                .Include(q => q.StudentFeedback)
-                .FirstOrDefaultAsync(q => q.Id == VM.QuestionId);
-
-            if (Question is null)
-                return NotFound("Question not found");
-
-
-            if (string.IsNullOrEmpty(VM.Feedback) || VM.Feedback.Length > 500)
-                return BadRequest("Please provide proper feedback");
-
-            var player_exists = await _applicationDbContext.QuestionStatistic
-                .AnyAsync(s => s.Player == VM.Player);
-
-            if (!player_exists)
-                return BadRequest("Player never played a game");
-
-            var feedback = new QuestionStudentFeedback()
-            {
-                Player = VM.Player,
-                QuestionId = Question.Id,
-                FeedbackContent = VM.Feedback,
-                DataPoolId = Question.DataPoolId
-            };
-
-            _applicationDbContext.QuestionStudentFeedback.Add(feedback);
-            await _applicationDbContext.SaveChangesAsync();
-
-            return Ok("Success");
-        }
     }
 }

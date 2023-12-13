@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using HeatQuizAPI.Database;
+using HeatQuizAPI.Mapping;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
+using heatquizapp_api.Models.Courses;
 using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.Questions.KeyboardQuestion;
 using heatquizapp_api.Models.Questions.MultipleChoiceQuestion;
@@ -16,7 +19,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.SharedQuestionController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class SharedQuestionController : Controller
@@ -45,16 +48,51 @@ namespace heatquizapp_api.Controllers.SharedQuestionController
             return View();
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetQuestionSeriesMapRelations([FromBody] UniversalAccessByIdViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+         
+            //Check question exists
+            var Question = await _applicationDbContext.QuestionBase
+                .FirstOrDefaultAsync(q => q.Id == VM.Id);
+
+            if (Question is null)
+                return NotFound("Question not found");
+
+            var Maps = await _applicationDbContext.CourseMap
+                .Include(m => m.Course)
+                .Include(m => m.Elements)
+                .ThenInclude(e => e.QuestionSeries)
+                .ThenInclude(qs => qs.Elements)
+                .Where(m => m.Elements.Any(el => el.QuestionSeriesId.HasValue && el.QuestionSeries.Elements.Any(e => e.QuestionId == VM.Id)))
+                .ToListAsync();
+
+            return Ok(Maps.Select(m => new
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Course = m.Course.Name,
+                CourseId = m.CourseId,
+                ImageURL = MappingProfile.GetGeneralImageURL(m),
+                Elements = _mapper.Map<List<CourseMapElement>, List<CourseMapElementViewModel>>
+                (m.Elements.Where(el => el.QuestionSeriesId.HasValue && el.QuestionSeries.Elements.Any(e => e.QuestionId == VM.Id)).ToList())
+            }));
+
+        }
+
+        
+
         [HttpPut("[action]")]
-        //Update type in vs code and location
-        public async Task<IActionResult> EditQuestionBaseInfo([FromBody] QuestionBaseViewModel QuestionVM)
+        public async Task<IActionResult> EditQuestionBaseInfo([FromBody] UpdateQuestionBasicInfoViewModel QuestionVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
 
             //Get datapool
             var DP = await _applicationDbContext.DataPools
-                .FirstOrDefaultAsync(dp => dp.Id == QuestionVM.DataPoolId);
+                .FirstOrDefaultAsync(dp => dp.Id == QuestionVM.DatapoolId);
 
             if (DP is null)
                 return NotFound("Datapool not found");
@@ -98,8 +136,7 @@ namespace heatquizapp_api.Controllers.SharedQuestionController
         }
 
         [HttpPut("[action]")]
-        //Update type in vs code and location
-        public async Task<IActionResult> EditQuestionLatex([FromBody] QuestionBaseViewModel QuestionVM)
+        public async Task<IActionResult> EditQuestionLatex([FromBody] UpdateQuestionLatexViewModel QuestionVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -118,7 +155,6 @@ namespace heatquizapp_api.Controllers.SharedQuestionController
         }
 
         [HttpPut("[action]")]
-        //Update type in vs code and location and name -- original: AddEditQuestionImage
         public async Task<IActionResult> EditQuestionImage([FromForm] UpdateQuestionImageViewModel VM)
         {
             if(!ModelState.IsValid)
@@ -234,7 +270,7 @@ namespace heatquizapp_api.Controllers.SharedQuestionController
             return Ok("Question copied");
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         public async Task<IActionResult> RemoveQuestionSolution([FromForm] RemoveQuestionSolutionViewModel VM)
         {
             if (!ModelState.IsValid)

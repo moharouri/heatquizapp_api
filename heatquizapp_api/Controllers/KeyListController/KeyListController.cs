@@ -10,11 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 using HeatQuizAPI.Utilities;
 using Microsoft.EntityFrameworkCore;
 using static heatquizapp_api.Utilities.Utilities;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.KeyListController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class KeyListController : Controller
@@ -64,7 +65,7 @@ namespace heatquizapp_api.Controllers.KeyListController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> GetListAssignedKeys([FromBody] KeysListViewModel VM)
+        public async Task<IActionResult> GetListAssignedKeys([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -150,7 +151,6 @@ namespace heatquizapp_api.Controllers.KeyListController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
         public async Task<IActionResult> ReassignKeys([FromBody] KeysListViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -201,8 +201,7 @@ namespace heatquizapp_api.Controllers.KeyListController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
-        public async Task<IActionResult> UpdateCode([FromBody] KeysListViewModel VM)
+        public async Task<IActionResult> UpdateCode([FromForm] UpdateKeysListCodeViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -216,7 +215,7 @@ namespace heatquizapp_api.Controllers.KeyListController
 
             //Check list exists
             var List = await _applicationDbContext.KeysLists
-                .FirstOrDefaultAsync(l => l.Id == VM.Id);
+                .FirstOrDefaultAsync(l => l.Id == VM.ListId);
 
             if (List is null)
                 return NotFound("List not found");

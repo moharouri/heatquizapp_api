@@ -151,7 +151,7 @@ namespace heatquizapp_api.Controllers.SearchEngineController
 
                      AddedByName = q.AddedBy.Name,
 
-                     ImageURL = MappingProfile.GetQuestionImageURL(q) ,
+                     ImageURL = MappingProfile.GetGeneralImageURL(q) ,
                      PDFURL = MappingProfile.GetQuestionPDFURL(q),
 
                      TotalGames = q.QuestionStatistics.Count,
@@ -225,7 +225,7 @@ namespace heatquizapp_api.Controllers.SearchEngineController
 
                      AddedByName = q.AddedBy.Name,
 
-                     ImageURL = MappingProfile.GetQuestionImageURL(q),
+                     ImageURL = MappingProfile.GetGeneralImageURL(q),
                      PDFURL = MappingProfile.GetQuestionPDFURL(q),
 
                      TotalGames = q.QuestionStatistics.Count,

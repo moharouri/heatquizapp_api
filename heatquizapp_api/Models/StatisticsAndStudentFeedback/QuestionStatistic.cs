@@ -13,7 +13,7 @@ namespace heatquizapp_api.Models.StatisticsAndStudentFeedback
 
         public bool Correct { get; set; }
 
-        public string Key { get; set; }
+        public string? Key { get; set; }
 
         public string Player { get; set; }
     }

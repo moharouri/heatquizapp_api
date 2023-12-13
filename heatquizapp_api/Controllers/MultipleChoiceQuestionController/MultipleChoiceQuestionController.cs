@@ -2,6 +2,7 @@
 using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Utilities;
+using heatquizapp_api.Models;
 using heatquizapp_api.Models.DefaultQuestionImages;
 using heatquizapp_api.Models.Questions;
 using heatquizapp_api.Models.Questions.MultipleChoiceQuestion;
@@ -17,7 +18,7 @@ using static heatquizapp_api.Utilities.Utilities;
 namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class MultipleChoiceQuestionController : Controller
@@ -46,8 +47,7 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
         }
 
         [HttpPost("[action]")]
-        //Change name and type in vscode -- original: GetQuestion_Portal
-        public async Task<IActionResult> GetQuestion([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestion([FromBody] UniversalAccessByIdViewModel VM)
         {
             if(!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -195,7 +195,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             else
             {
                 var pathToImage = DefaultImage.ImageURL;
-                pathToImage = Path.Combine("wwwroot", pathToImage);
 
                 URL = await CopyFile(pathToImage);
 
@@ -219,6 +218,8 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
                         URL = await SaveFile(Picture);
                         choiceImageURL = URL;
                     }
+
+                    index += 1;
                 }
 
                 Question.Choices.Add(new MultipleChoiceQuestionChoice()
@@ -228,8 +229,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
                     DataPoolId = DP.Id,
                     ImageURL = choiceImageURL
                 });
-
-                index += 1;
             }
 
             //PDF
@@ -255,7 +254,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
         }
 
         [HttpPost("[action]")]
-        //Change name in vs code --original AddQuestionAnswer
         public async Task<IActionResult> AddQuestionChoice([FromForm] AddChoiceViewModel VM)
         {
             if(!ModelState.IsValid) 
@@ -263,6 +261,7 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
 
             //Check question exists
             var Question = await _applicationDbContext.MultipleChoiceQuestions
+                .Include(q => q.Choices)
                 .FirstOrDefaultAsync(q => q.Id == VM.QuestionId);
 
             if (Question is null)
@@ -271,10 +270,18 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             if ((VM.Picture is null) && string.IsNullOrEmpty(VM.Latex))
                 return BadRequest("Please provide picture or LaTeX text");
 
+            //Check latex unique
+            if(VM.Latex != null)
+            {
+                if (Question.Choices.Any(a => a.Latex == VM.Latex))
+                    return BadRequest("Repeated LaTeX code");
+            }
+
             //Create new choice
             var newChoice = new MultipleChoiceQuestionChoice()
             {
                 Correct = VM.Correct,
+                DataPoolId = Question.DataPoolId
             };
 
             //Add image if available
@@ -307,7 +314,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
         }
 
         [HttpPut("[action]")]
-        //Change type and name in vs code -- original EditQuestionAnswer
         public async Task<IActionResult> EditQuestionChoice([FromForm] UpdateChoiceViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -326,11 +332,14 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             if (Choice is null)
                 return NotFound($"Choice not found");
 
-            if (Question.Choices.Where(c => c.Id != VM.AnswerId && c.Correct).Count() == 0 && !VM.Correct.Value)
-                return NotFound($"Atleast one choice must be correct");
+            if (VM.Correct.HasValue)
+            {
+                if (Question.Choices.Where(c => c.Id != VM.AnswerId && c.Correct).Count() == 0 && !VM.Correct.Value)
+                    return NotFound($"Atleast one choice must be correct");
+            }
 
-            if ((VM.Picture is null) && string.IsNullOrEmpty(VM.Latex))
-                return BadRequest("Please provide a picture or LaTeX text");
+            if ((VM.Picture is null) && string.IsNullOrEmpty(VM.Latex) && !VM.Correct.HasValue)
+                return BadRequest("Please provide values ");
 
             //Update image if provided
             if (VM.Picture != null)
@@ -340,6 +349,12 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
 
                 if (!isExtensionValid)
                     return BadRequest("Picture extension not valid");
+
+                //Try removing image
+                if (Choice.ImageURL != null)
+                {
+                    RemoveFile(Choice.ImageURL);
+                }
 
                 //Save picture and generate a url
                 var URL = await SaveFile(VM.Picture);
@@ -357,7 +372,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
 
 
         [HttpPut("[action]")]
-        //Change type in vs code and name -- original RemoveQuestionAnswerLatex
         public async Task<IActionResult> RemoveQuestionChoiceLatex([FromForm] UpdateChoiceViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -387,7 +401,6 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code and name -- original RemoveQuestionAnswerImage
         public async Task<IActionResult> RemoveQuestionChoiceImage([FromForm] UpdateChoiceViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -409,10 +422,11 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             if (string.IsNullOrEmpty(Choice.Latex))
                 return NotFound("Please add LaTeX text before deleting the image");
 
-            var removeImageResult = RemoveFile(Choice.ImageURL);
-
-            if (!removeImageResult)
-                return BadRequest("Failed to remove the image");
+            //Try removing image
+            if(Choice.ImageURL != null)
+            {
+                RemoveFile(Choice.ImageURL);
+            }
 
             Choice.ImageURL = null;
 
@@ -421,8 +435,7 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             return Ok(_mapper.Map<MultipleChoiceQuestion, MultipleChoiceQuestionViewModel>(Question));
         }
 
-        [HttpDelete("[action]")]
-        //Change type and name in vs code -- original RemoveQuestionAnswer and VM from Id -> QuestionId
+        [HttpPut("[action]")]
         public async Task<IActionResult> RemoveQuestionChoice([FromBody] UpdateChoiceViewModel QuestionVM)
         {
             if (!ModelState.IsValid)
@@ -442,11 +455,17 @@ namespace heatquizapp_api.Controllers.MultipleChoiceQuestionController
             if (Choice is null)
                 return NotFound("Question answer not found");
 
+            //Try removing image
+            if (Choice.ImageURL != null)
+            {
+                RemoveFile(Choice.ImageURL);
+            }
+
             //Check choices consistency
             if (Question.Choices.Count == 1)
                 return BadRequest("Cannot delete this answer because it is the only answer left");
 
-            if (Question.Choices.Where(c => c.Correct && c.Id == Choice.Id).Count() == 1)
+            if (!Question.Choices.Any(c => c.Correct && c.Id != Choice.Id))
                 return BadRequest("Cannot delete this answer because it is the only correct answer left");
 
             //Remove choice
