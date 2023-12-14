@@ -267,7 +267,7 @@ namespace heatquizapp_api.Controllers.StudentsController
                     {
                         AnswerLatex = VM.Latex,
 
-                        DataPoolId = Question.DataPoolId
+                        DataPoolId = KQuestion.DataPoolId
                     });
                 }
             }

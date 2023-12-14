@@ -206,6 +206,7 @@ namespace heatquizapp_api.Controllers.SearchEngineController
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data");
 
+
             var Questions = await _applicationDbContext.QuestionBase
                 .Where(q => VM.Ids.Any(Id => Id == q.Id))
 
@@ -230,7 +231,7 @@ namespace heatquizapp_api.Controllers.SearchEngineController
 
                      TotalGames = q.QuestionStatistics.Count,
                      TotalCorrectGames = q.QuestionStatistics.Count(s => s.Correct),
-                     MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(qs => qs.TotalTime).ElementAt((int)(q.QuestionStatistics.Count() / 2)).TotalTime : 0,
+                     MedianPlayTime = q.QuestionStatistics.Any() ? q.QuestionStatistics.OrderBy(a => a.TotalTime).ToList()[(int)(q.QuestionStatistics.Count() / 2)].TotalTime : 0,
 
                      TotalPDFViews = q.QuestionPDFStatistics.Count,
                      TotalPDFViewsWrong = q.QuestionPDFStatistics.Count(a => !a.Correct),
@@ -375,16 +376,16 @@ namespace heatquizapp_api.Controllers.SearchEngineController
             return Ok(new
             {
                 Series = _mapper.Map<List<QuestionSeries>, List<QuestionSeriesViewModel>>(Series),
+
                 Codes = VM.Codes,
-                NumberOfSeries = VM.NumberOfObjects,
-                SeriesIds = VM.ObjectsIds,
-                SeriesCodes = VM.Codes
+                NumberOfObjects = VM.NumberOfObjects,
+                ObjectsIds = VM.Ids,
+                ObjectsCodes = VM.Codes
             });
 
         }
 
         [HttpPost("[action]")]
-        //Change Name and position  -- original SearchKeyoards_ADVANCED_UPDATED_PORTAL
         public async Task<IActionResult> SearchKeyoards([FromBody] KeyboardsSearchViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -474,7 +475,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
         }
 
         [HttpPost("[action]")]
-        //change position and name in vs code -- original: SearchKeyoardsByIds_ADVANCED
         public async Task<IActionResult> SearchKeyoardsByIds([FromBody] SearchByIdsViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -515,7 +515,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
         }
 
         [HttpPost("[action]")]
-        //change position and name in vs code -- original: SearchKeys_ADVANCED_PORTAL
         public async Task<IActionResult> SearchKeys([FromBody] KeysSearchViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -679,7 +678,6 @@ namespace heatquizapp_api.Controllers.SearchEngineController
         }
 
         [HttpPost("[action]")]
-        //change position and name in vs code -- original: SearchKeysByIds_ADVANCED
         public async Task<IActionResult> SearchKeysByIds([FromBody] SearchByIdsViewModel VM)
         {
             if (!ModelState.IsValid)

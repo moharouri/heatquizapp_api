@@ -10,8 +10,6 @@ namespace heatquizapp_api.Models.Keyboard
 
         public bool IsInteger { get; set; }
 
-        public string KeySimpleForm { get; set; }
-
         //Key list
         public KeysList KeysList { get; set; }
         public int KeysListId { get; set; }

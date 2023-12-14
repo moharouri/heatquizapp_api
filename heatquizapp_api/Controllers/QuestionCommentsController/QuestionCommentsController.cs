@@ -12,11 +12,12 @@ using static heatquizapp_api.Utilities.Utilities;
 using System.Globalization;
 using HeatQuizAPI.Mapping;
 using heatquizapp_api.Models.BaseModels;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.QuestionCommentsController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class QuestionCommentsController : Controller
@@ -48,7 +49,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
 
         [HttpPost("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> GetQuestionComments([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestionComments([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -155,7 +156,6 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code -- name original: GetUnseenCommentsNumber
         public async Task<IActionResult> GetUnseenComments([FromBody] DatapoolCarrierViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -188,9 +188,11 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
                 .Where(a => a.UserId == user.Id)
                 .ToListAsync();
 
+            var notificationsDates = notificationSubscribtions.ToDictionary(a => a.Id);
+            var notificationsDPIds = notificationSubscribtions.Select(a => a.DatapoolId).ToList();
+
             var StudentFeedback = await _applicationDbContext.QuestionStudentFeedback
-                .Where(f => notificationSubscribtions
-                .Any(a => a.DatapoolId == f.DataPoolId && f.DateCreated >= DateTime.Today))
+                .Where(f => f.DateCreated >= DateTime.Today && notificationsDPIds.Any(Id => Id == f.DataPoolId))
                 .Include(r => r.Question)
                 .Select(r => new
                 {
@@ -198,13 +200,13 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
                     Player = r.Player,
                     FeedbackContent = r.FeedbackContent,
                     DateCreated = r.DateCreated,
-                    New = r.DateCreated > notificationSubscribtions.FirstOrDefault(a => a.DatapoolId == r.DataPoolId).LastSeen,
+                    New = r.DateCreated > notificationsDates[r.DataPoolId].LastSeen,
                     Question = new
                     {
                         Code = r.Question.Code,
                         Type = r.Question.Type,
                         Id = r.Question.Id,
-                        Base_ImageURL = MappingProfile.GetGeneralImageURL(r.Question)
+                        ImageURL = MappingProfile.GetGeneralImageURL(r.Question)
                     }
                 })
                 .OrderByDescending(a => a.DateCreated)
@@ -248,7 +250,6 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
 
                 .Include(q => q.CommentSection)
                 .ThenInclude(cs => cs.Tages)
-                .ThenInclude(tg => tg.AddedById)
                 .FirstOrDefaultAsync(q => q.Id == VM.QuestionId);
 
             //Check question
@@ -288,7 +289,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
 
 
             var non_existing_tagged_users = TaggedUsers.Where(tg => 
-            !Question.CommentSection.Tages.Any(cstg => cstg.AddedBy.Id == tg.Id) && tg.Id != Adder.Id);
+            !Question.CommentSection.Tages.Any(cstg => cstg.AddedById == tg.Id) && tg.Id != Adder.Id);
 
             //Update general tags
             Question.CommentSection.Tages.AddRange(non_existing_tagged_users.Select(a => new QuestionCommentSectionTag()
@@ -298,7 +299,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
                 LastSeen = DateTime.Now.AddDays(-1)
             }));
 
-            if (!Question.CommentSection.Tages.Any(t => t.AddedBy.Id == Adder.Id))
+            if (!Question.CommentSection.Tages.Any(t => t.AddedById == Adder.Id))
             {
                 Question.CommentSection.Tages.Add(new QuestionCommentSectionTag()
                 {
@@ -311,7 +312,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
             //add comments
             Question.CommentSection.Comments.Add(new QuestionComment()
             {
-                AddedBy = Adder,
+                AddedById = Adder.Id,
 
                 Text = VM.Comment,
 
@@ -329,8 +330,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code and request method in vs code
-        public async Task<IActionResult> RegisterSeenNotification([FromBody] QuestionCommentSectionViewModel VM)
+        public async Task<IActionResult> RegisterSeenNotification([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

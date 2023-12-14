@@ -13,5 +13,7 @@ namespace heatquizapp_api.Models.Keyboard
 
         public string ReplacementCharacter { get; set; }
 
+        public List<AbastractKeyboardAnswerElement> AnswerElements { get; set; } = new List<AbastractKeyboardAnswerElement>();
+
     }
 }

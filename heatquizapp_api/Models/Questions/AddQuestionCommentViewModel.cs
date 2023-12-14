@@ -5,6 +5,6 @@
         public int QuestionId { get; set; } 
         public string Comment { get; set; }
 
-        public  List<string> Tags { get; set; }
+        public  List<string> Tags { get; set; } = new List<string>();
     }
 }

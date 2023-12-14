@@ -45,6 +45,11 @@ namespace HeatQuizAPI.Database
         public DbSet<KeyboardNumericKey> NumericKeys { get; set; }
         public DbSet<KeyboardVariableKey> VariableKeys { get; set; }
 
+        public DbSet<KeyboardNumericKeyRelation> KeyboardNumericKeyRelation { get; set; }
+        public DbSet<KeyboardVariableKeyRelation> KeyboardVariableKeyRelation { get; set; }
+        public DbSet<KeyboardVariableKeyImageRelation> KeyboardVariableKeyImageRelation { get; set; }
+
+
         public DbSet<KeysList> KeysLists { get; set; }
 
         //Keyboard answers elements
@@ -73,6 +78,8 @@ namespace HeatQuizAPI.Database
         public DbSet<KeyboardQuestion> KeyboardQuestion { get; set; }
 
         public DbSet<KeyboardQuestionAnswer> KeyboardQuestionAnswer { get; set; }
+        public DbSet<KeyboardQuestionAnswerElement> KeyboardQuestionAnswerElement { get; set; }
+
         public DbSet<KeyboardQuestionWrongAnswer> KeyboardQuestionWrongAnswers { get; set; }
 
 

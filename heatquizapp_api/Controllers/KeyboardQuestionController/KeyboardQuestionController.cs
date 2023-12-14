@@ -12,11 +12,12 @@ using HeatQuizAPI.Utilities;
 using System.Xml;
 using heatquizapp_api.Models.DefaultQuestionImages;
 using static heatquizapp_api.Utilities.Utilities;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.KeyboardQuestionController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class KeyboardQuestionController : Controller
@@ -46,8 +47,7 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
         }
 
         [HttpPost("[action]")]
-        //Change name and type in vscode -- original: GetQuestion_Portal
-        public async Task<IActionResult> GetQuestion([FromBody] QuestionBaseViewModel VM)
+        public async Task<IActionResult> GetQuestion([FromBody] UniversalAccessByIdViewModel VM)
         {
             var Question = await _applicationDbContext.KeyboardQuestion
 
@@ -209,7 +209,6 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
             else
             {
                 var pathToImage = DefaultImage.ImageURL;
-                pathToImage = Path.Combine("wwwroot", pathToImage);
 
                 URL = await CopyFile(pathToImage);
 
@@ -326,7 +325,7 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
             //Add answer
             var Answer = new KeyboardQuestionAnswer()
             {
-
+                DataPoolId = Question.DataPoolId
             };
 
             Question.Answers.Add(Answer);
@@ -340,8 +339,9 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
                     Value = e.Value,
 
                     NumericKeyId = e.NumericKeyId.HasValue ?
-                    new Nullable<int>(Question.Keyboard.NumericKeys.FirstOrDefault(r => r.NumericKeyId == e.NumericKeyId).Id) : null
+                    new Nullable<int>(Question.Keyboard.NumericKeys.FirstOrDefault(r => r.NumericKeyId == e.NumericKeyId).Id) : null,
 
+                    DataPoolId = Question.DataPoolId
                 };
 
                 Answer.AnswerElements.Add(AddEelemnt);
@@ -353,8 +353,7 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
             return Ok(_mapper.Map<KeyboardQuestion, KeyboardQuestionViewModel>(Question));
         }
 
-        [HttpDelete("[action]")]
-        //Change type in vs code
+        [HttpPut("[action]")]
         public async Task<IActionResult> RemoveQuestionAnswer([FromBody] RemoveKeyboardQuestionAnswerViewModel QuestionVM)
         {
             if (!ModelState.IsValid)
@@ -386,8 +385,7 @@ namespace heatquizapp_api.Controllers.KeyboardQuestionController
         }
 
         [HttpPost("[action]")]
-        //Change type in vs code change name -- original: GetKeyboardQuestionWrongAnswers_PORTAL
-        public async Task<IActionResult> GetKeyboardQuestionWrongAnswers([FromBody] KeyboardQuestionViewModel VM)
+        public async Task<IActionResult> GetKeyboardQuestionWrongAnswers([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

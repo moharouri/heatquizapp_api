@@ -116,7 +116,10 @@ namespace HeatQuizAPI.Mapping
             CreateMap<QuestionBase, QuestionBaseViewModel>()
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
-                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt));
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt)); 
+
+            CreateMap<QuestionBase, QuestionBaseCommentsViewModel>()
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt)); 
 
             CreateMap<QuestionCommentSection, QuestionCommentSectionViewModel>();
 
@@ -142,7 +145,7 @@ namespace HeatQuizAPI.Mapping
 
             //Multiple choice question 
             CreateMap<MultipleChoiceQuestion, MultipleChoiceQuestionViewModel>()
-            .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
+                .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
                 .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
                 .ForMember(vm => vm.PDFURL, opt => mapPDF(opt));
 
@@ -150,7 +153,18 @@ namespace HeatQuizAPI.Mapping
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));
 
             //Keyboard question
-            CreateMap<KeyboardQuestion, KeyboardQuestionViewModel>();
+            CreateMap<KeyboardQuestion, KeyboardQuestionViewModel>()
+                .ForMember(vm => vm.ImageURL, opt => mapImage(opt))
+                .ForMember(vm => vm.AddedByName, opt => mapUser(opt))
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt)); 
+            
+            CreateMap<KeyboardQuestionAnswer, KeyboardQuestionAnswerViewModel>(); 
+            
+            CreateMap<KeyboardQuestionAnswerElement, KeyboardQuestionAnswerElementViewModel>()
+                .ForMember(vm => vm.TextPresentation, opt => 
+                opt.MapFrom(g => g.NumericKeyId != null ? g.NumericKey.NumericKey.TextPresentation : g.Image.Variation.TextPresentation));
+
+            CreateMap<KeyboardQuestionWrongAnswer, KeyboardQuestionWrongAnswerViewModel>(); 
 
             //Student feedback
             CreateMap<QuestionStudentFeedback, QuestionStudentFeedbackViewModel>();

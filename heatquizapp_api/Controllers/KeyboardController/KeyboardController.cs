@@ -10,11 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HeatQuizAPI.Utilities;
 using static heatquizapp_api.Utilities.Utilities;
+using heatquizapp_api.Models;
 
 namespace heatquizapp_api.Controllers.KeyboardController
 {
     [EnableCors("CorsPolicy")]
-    [Route("api/[controller]")]
+    [Route("apidpaware/[controller]")]
     [ApiController]
     [Authorize]
     public class KeyboardController : Controller
@@ -42,6 +43,40 @@ namespace heatquizapp_api.Controllers.KeyboardController
         {
             return View();
         }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetKeyboard([FromBody] UniversalAccessByIdViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var Keyboard = await _applicationDbContext.Keyboards
+
+                .Include(k => k.NumericKeys)
+                .ThenInclude(nk => nk.NumericKey)
+
+                .Include(k => k.NumericKeys)
+                .ThenInclude(nk => nk.AnswerElements)
+
+                .Include(k => k.VariableKeys)
+                .ThenInclude(vk => vk.VariableKey)
+
+                .Include(k => k.VariableKeyImages)
+                .ThenInclude(vk => vk.AnswerElements)
+
+                .Include(k => k.VariableKeyImages)
+                .ThenInclude(vk => vk.Variation)
+
+                .Include(k => k.KeyboardQuestions)
+                .FirstOrDefaultAsync(k => k.Id == VM.Id);
+
+            if (Keyboard is null)
+                return BadRequest("Keyboard not found");
+
+            return Ok(_mapper.Map<Keyboard, KeyboardViewModel>(Keyboard));
+
+        }
+
 
         [HttpPost("[action]")]
         //Change type in vs code
@@ -79,7 +114,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddKeyboardNumericKey([FromBody] KeyboardNumericKeyViewModel KeyVM)
+        public async Task<IActionResult> AddKeyboardNumericKey([FromBody] AddNumericKeyViewModel KeyVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -97,7 +132,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
 
             //Check LaTeX code not null
             if (string.IsNullOrEmpty(KeyVM.TextPresentation))
-                return BadRequest("Latex Code Can't Be Empty");
+                return BadRequest("Latex code can't be empty");
 
             //Check code not taken
             var codeTaken = await _applicationDbContext.NumericKeys
@@ -107,7 +142,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
                 .AnyAsync(k => k.Code == KeyVM.Code && k.DataPoolId == DP.Id);
 
             if (codeTaken)
-                return BadRequest("Code Taken, Choose Different Code");
+                return BadRequest("Code Taken, choose different code");
 
             //Check Latex Code Unique 
             var latexCodeUsed = await _applicationDbContext.NumericKeys
@@ -144,7 +179,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddKeyboardVariableKey([FromBody] KeyboardVariableKeyViewModel KeyVM)
+        public async Task<IActionResult> AddKeyboardVariableKey([FromBody] AddVariableKeyViewModel KeyVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -158,15 +193,15 @@ namespace heatquizapp_api.Controllers.KeyboardController
 
             //Check Code not Null
             if (string.IsNullOrEmpty(KeyVM.Code))
-                return BadRequest("Code Can't Be Empty");
+                return BadRequest("Code can't be empty");
 
             //Check LATEX Code not Null
             if (string.IsNullOrEmpty(KeyVM.TextPresentation))
-                return BadRequest("Latex Code Can't Be Empty");
+                return BadRequest("Latex code can't be empty");
 
             //Check LaTeX code not null
             if (string.IsNullOrEmpty(KeyVM.TextPresentation))
-                return BadRequest("Latex Code Can't Be Empty");
+                return BadRequest("Latex code can't be empty");
 
             //Check code not taken
             var codeTaken = await _applicationDbContext.NumericKeys
@@ -176,7 +211,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
                 .AnyAsync(k => k.Code == KeyVM.Code && k.DataPoolId == DP.Id);
 
             if (codeTaken)
-                return BadRequest("Code Taken, Choose Different Code");
+                return BadRequest("Code taken, choose different code");
 
             //Check Latex Code Unique 
             var latexCodeUsed = await _applicationDbContext.NumericKeys
@@ -201,9 +236,9 @@ namespace heatquizapp_api.Controllers.KeyboardController
                 Code = KeyVM.Code,
                 TextPresentation = KeyVM.TextPresentation,
 
-                Variations = KeyVM.Variations.Select(image => new KeyboardVariableKeyVariation()
+                Variations = KeyVM.Variations.Select(v => new KeyboardVariableKeyVariation()
                 {
-                    TextPresentation = image.TextPresentation,
+                    TextPresentation = v,
                     DataPoolId = DP.Id
                 }).ToList(),
 
@@ -218,7 +253,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddKeyboard([FromBody] KeyboardViewModel KeyboardVM)
+        public async Task<IActionResult> AddKeyboard([FromBody] AddKeyboardViewModel KeyboardVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -253,17 +288,21 @@ namespace heatquizapp_api.Controllers.KeyboardController
             };
 
             //Check keys exist
+            var UsedNKeyIds = KeyboardVM.NumericKeys.Select(x => x.Id).ToList();
+
             var NKeys = await _applicationDbContext.NumericKeys
-                .Where(k => KeyboardVM.NumericKeys.Any(kvm => k.Id == kvm.Id))
+                .Where(k => UsedNKeyIds.Any(Id => Id == k.Id))
                 .ToListAsync();
 
             if (NKeys.Count != KeyboardVM.NumericKeys.Distinct().Count())
                 return BadRequest("Alteast One numeric key doest not exist");
 
             //Check Keys Exist
+            var UsedVKeyIds = KeyboardVM.VariableKeys.Select(x => x.Id).ToList();
+
             var VKeys = await _applicationDbContext.VariableKeys
                 .Include(k => k.Variations)
-                .Where(k => KeyboardVM.VariableKeys.Any(kvm => k.Id == kvm.Id))
+                .Where(k => UsedVKeyIds.Any(Id => Id == k.Id))
                 .ToListAsync();
 
             if (VKeys.Count != KeyboardVM.VariableKeys.Distinct().Count())
@@ -346,7 +385,7 @@ namespace heatquizapp_api.Controllers.KeyboardController
 
         [HttpPut("[action]")]
         //Change type in vs code
-        public async Task<IActionResult> EditKeyboardName([FromBody] KeyboardViewModel KeyboardVM)
+        public async Task<IActionResult> EditKeyboardName([FromBody] UpdateKeyboardNameViewModel KeyboardVM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
@@ -435,9 +474,185 @@ namespace heatquizapp_api.Controllers.KeyboardController
             return Ok();
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> AssignKeysToKeyboard([FromBody] AssignKeysToKeyboardViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            //Check Datapool
+            var DP = await _applicationDbContext.DataPools
+               .FirstOrDefaultAsync(dp => dp.Id == VM.DataPoolId);
+
+            if (DP is null)
+                return NotFound("Datapool not found");
+
+            var Keyboard = await _applicationDbContext.Keyboards
+                .Include(k => k.NumericKeys)
+                .Include(k => k.VariableKeys)
+                .Include(k => k.VariableKeyImages)
+                .FirstOrDefaultAsync(k => k.Id == VM.Id && k.DataPoolId == DP.Id);
+
+            if (Keyboard is null)
+                return NotFound("Not Found");
+
+            //Check keys exist
+            var UsedNKeyIds = VM.NumericKeys.Select(x => x.Id).ToList();
+
+            var NKeys = await _applicationDbContext.NumericKeys
+                .Where(k => UsedNKeyIds.Any(Id => Id == k.Id))
+                .ToListAsync();
+
+            if (NKeys.Count != VM.NumericKeys.Distinct().Count())
+                return BadRequest("Alteast One numeric key doest not exist");
+
+            //Check Keys Exist
+            var UsedVKeyIds = VM.VariableKeys.Select(x => x.Id).ToList();
+
+            var VKeys = await _applicationDbContext.VariableKeys
+                .Include(k => k.Variations)
+                .Where(k => UsedVKeyIds.Any(Id => Id == k.Id))
+                .ToListAsync();
+
+            if (VKeys.Count != VM.VariableKeys.Distinct().Count())
+                return BadRequest("Alteast one variable key doest not exist");
+
+            //Check Not Used Already
+            if (Keyboard.NumericKeys.Any(nk => NKeys.Any(vnk => vnk.Id == nk.NumericKeyId)))
+                return BadRequest("Some Keys Already Included");
+
+            if (Keyboard.VariableKeys.Any(nk => VKeys.Any(vnk => vnk.Id == nk.VariableKeyId)))
+                return BadRequest("Some Keys Already Included");
+
+            //Try to get replacement char
+            var BaseOrder = Math.Max(
+                Keyboard.NumericKeys.Count != 0 ? Keyboard.NumericKeys.Max(nk => nk.Order) : 0,
+                Keyboard.VariableKeys.Count != 0 ? Keyboard.VariableKeys.Max(nk => nk.Order) : 0
+                );
+
+            var index = 0;
+            foreach(var nk in VM.NumericKeys.OrderBy(nk => nk.Order))
+            {
+                var uniqueReplacementChar = GetUniqueKeyboardReplacementChar(Keyboard);
+
+                if (uniqueReplacementChar is null)
+                    return BadRequest($"Cannot add key variation; keyboard {Keyboard.Name} has too many keys");
+
+                var newKey = new KeyboardNumericKeyRelation()
+                {
+                    NumericKeyId = nk.Id,
+                    KeySimpleForm = uniqueReplacementChar,
+                    Order = BaseOrder + index + 1,
+                    DataPoolId = DP.Id
+                };
+
+                Keyboard.NumericKeys.Add(newKey);
+
+                index++;
+            }
+
+            var VKIndex = NKeys.Count;
+
+            foreach (var vk in VM.VariableKeys.OrderBy(nk => nk.Order))
+            {
+                var VK = VKeys.FirstOrDefault(vkid => vkid.Id == vk.Id);
+
+                Keyboard.VariableKeys.Add(new KeyboardVariableKeyRelation()
+                {
+                    VariableKey = VK,
+                    Order = BaseOrder + index + 1,
+                    DataPoolId = DP.Id
+                });
+
+                index++;
+
+                var uniqueReplacementChar = GetUniqueKeyboardReplacementChar(Keyboard);
+
+                if (uniqueReplacementChar is null)
+                    return BadRequest($"Cannot add key variation; keyboard {Keyboard.Name} has too many keys");
+
+                Keyboard.VariableKeyImages.AddRange(VK.Variations.Select((k, i) => new KeyboardVariableKeyImageRelation()
+                {
+                    VariationId = k.Id,
+                    ReplacementCharacter = uniqueReplacementChar,
+                    DataPoolId = DP.Id
+                }));
+            }
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok(_mapper.Map<Keyboard, KeyboardViewModel>(Keyboard));
+        }
+
         [HttpPut("[action]")]
-        //Change type in vs code
-        //Try optimize
+        public async Task<IActionResult> RemoveKeyFromKeyboard([FromBody] RemoveKeyFromKeyboardViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            //Check Datapool
+
+            var Keyboard = await _applicationDbContext.Keyboards
+                .Include(k => k.NumericKeys)
+                .ThenInclude(a => a.AnswerElements)
+
+                .Include(k => k.VariableKeys)
+                
+                .Include(k => k.VariableKeyImages)
+                .ThenInclude(a => a.AnswerElements)
+
+                 .Include(k => k.VariableKeyImages)
+                .ThenInclude(a => a.Variation)
+
+                .FirstOrDefaultAsync(k => k.Id == VM.KeyboardId);
+
+            if (Keyboard is null)
+                return NotFound("Keyboard not found");
+            
+            if(VM.KeyType == Constants.NUMERIC_KEY_TYPE)
+            {
+                var relation = Keyboard.NumericKeys.FirstOrDefault(a => a.Id == VM.RelationId);
+
+                if (relation is null)
+                    return BadRequest("Relationship not found");
+
+                if (relation.AnswerElements.Any())
+                    return BadRequest("Key is used cannot be removed");
+
+                if(!Keyboard.NumericKeys.Any(a => a.Id != VM.RelationId) && !Keyboard.VariableKeys.Any())
+                    return BadRequest("Keyboard is left with no keys");
+
+                _applicationDbContext.KeyboardNumericKeyRelation.Remove(relation);
+
+                await _applicationDbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var relation = Keyboard.VariableKeys.FirstOrDefault(a => a.Id == VM.RelationId);
+
+                if (relation is null)
+                    return BadRequest("Relationship not found");
+
+                var relatedVariantRelations = Keyboard.VariableKeyImages.Where(a => a.Variation.KeyId == relation.VariableKeyId).ToList();
+                var isUsed = relatedVariantRelations.Any(x => x.AnswerElements.Any());
+
+                if (isUsed)
+                    return BadRequest("Key is used cannot be removed");
+
+                if (!Keyboard.NumericKeys.Any() && !Keyboard.VariableKeys.Any(a => a.Id != VM.RelationId))
+                    return BadRequest("Keyboard is left with no keys");
+
+                _applicationDbContext.KeyboardVariableKeyRelation.Remove(relation);
+                _applicationDbContext.KeyboardVariableKeyImageRelation.RemoveRange(relatedVariantRelations);
+
+                await _applicationDbContext.SaveChangesAsync();
+            }
+
+            return Ok(_mapper.Map<Keyboard, KeyboardViewModel>(Keyboard));
+        }
+
+
+        [HttpPut("[action]")]
         public async Task<IActionResult> SwabKeyboardKeys([FromBody] SwabKeyboardKeysViewModel KeyboardVM)
         {
             if (!ModelState.IsValid)
@@ -523,10 +738,59 @@ namespace heatquizapp_api.Controllers.KeyboardController
         }
 
         [HttpPost("[action]")]
-        //CHECK LATER
-        public async Task<IActionResult> GetQuestionsForKeyboardKey()
+        public async Task<IActionResult> GetQuestionsForKeyboardKey([FromBody] ViewKeyUsedQuestionsViewModel VM)
         {
-            return Ok();
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+            
+            if(VM.KeyType == Constants.NUMERIC_KEY_TYPE)
+            {
+                var relation = _applicationDbContext.KeyboardNumericKeyRelation
+                    
+                    .FirstOrDefault(a => a.Id == VM.RelationId);
+
+                if (relation is null)
+                    return BadRequest("Relationship not found");
+
+                var usedKeyboardQuestions = await _applicationDbContext.KeyboardQuestionAnswerElement
+                    .Where(a => a.NumericKeyId == relation.Id)
+                    .Select(a => a.Answer.Question)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    KeyboardQuestions = _mapper.Map<List<KeyboardQuestionViewModel>>(usedKeyboardQuestions)
+                });
+            }
+            else
+            {
+                var relation = _applicationDbContext.KeyboardVariableKeyRelation
+                    .Include(a => a.Keyboard)
+                    .ThenInclude(k => k.VariableKeyImages)
+                    .ThenInclude(i => i.Variation)
+                    .FirstOrDefault(a => a.Id == VM.RelationId);
+
+                if (relation is null)
+                    return BadRequest("Relationship not found");
+
+                var Keyboard = relation.Keyboard;
+
+                var relatedVariantRelations = Keyboard.VariableKeyImages
+                    .Where(a => a.Variation.KeyId == relation.VariableKeyId)
+                    .Select(a => a.Id)
+                    .ToList();
+
+                var usedKeyboardQuestions = await _applicationDbContext.KeyboardQuestionAnswerElement
+                    .Where(a => relatedVariantRelations.Any(Id => a.ImageId == Id))
+                    .Select(a => a.Answer.Question)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    KeyboardQuestions = _mapper.Map<List<KeyboardQuestionViewModel>>(usedKeyboardQuestions)
+                });
+            }
+
         }
 
 
