@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace heatquizappapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231213164945_Question stat key optional")]
-    partial class Questionstatkeyoptional
+    [Migration("20231215170027_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -711,7 +711,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ExternalVideoLink")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Length")
@@ -727,7 +726,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("PDFURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("QuestionSeriesId")
@@ -1211,10 +1209,6 @@ namespace heatquizappapi.Migrations
 
                     b.Property<bool>("IsInteger")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("KeySimpleForm")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("KeysListId")
                         .HasColumnType("integer");
@@ -2066,15 +2060,12 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("MapElementName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MapKey")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MapName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("OnMobile")
@@ -3028,7 +3019,7 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyImageRelation", "Image")
-                        .WithMany()
+                        .WithMany("AnswerElements")
                         .HasForeignKey("ImageId");
 
                     b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", null)
@@ -3572,6 +3563,11 @@ namespace heatquizappapi.Migrations
                     b.Navigation("Relations");
 
                     b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyImageRelation", b =>
+                {
+                    b.Navigation("AnswerElements");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", b =>

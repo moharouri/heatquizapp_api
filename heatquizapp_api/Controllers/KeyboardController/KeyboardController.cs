@@ -384,7 +384,33 @@ namespace heatquizapp_api.Controllers.KeyboardController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code
+        public async Task<IActionResult> RemoveKeyboard([FromBody] UniversalAccessByIdViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var keyboard = await _applicationDbContext.Keyboards
+                .Include(a => a.KeyboardQuestions)
+                .Include(a => a.NumericKeys)
+                .Include(a => a.VariableKeys)
+                .Include(a => a.VariableKeyImages)
+
+                .FirstOrDefaultAsync(a => a.Id == VM.Id);
+
+            if (keyboard is null)
+                return BadRequest("Keyboard not found");
+
+            if (keyboard.KeyboardQuestions.Any())
+                return BadRequest("Keyboard used in some questions cannot be removed");
+
+            _applicationDbContext.Keyboards.Remove(keyboard);
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPut("[action]")]
         public async Task<IActionResult> EditKeyboardName([FromBody] UpdateKeyboardNameViewModel KeyboardVM)
         {
             if (!ModelState.IsValid)

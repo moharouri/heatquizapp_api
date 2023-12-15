@@ -49,7 +49,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataPools", (string)null);
+                    b.ToTable("DataPools");
                 });
 
             modelBuilder.Entity("HeatQuizAPI.Models.BaseModels.User", b =>
@@ -153,7 +153,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LevelsOfDifficulty", (string)null);
+                    b.ToTable("LevelsOfDifficulty");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -315,7 +315,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataPoolAccess", (string)null);
+                    b.ToTable("DataPoolAccess");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.BaseModels.DatapoolNotificationSubscription", b =>
@@ -345,7 +345,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DatapoolNotificationSubscriptions", (string)null);
+                    b.ToTable("DatapoolNotificationSubscriptions");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.BaseModels.UserLinkedPlayerKey", b =>
@@ -371,7 +371,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLinkedPlayerKeys", (string)null);
+                    b.ToTable("UserLinkedPlayerKeys");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.ClickImageTrees.ImageAnswer", b =>
@@ -416,7 +416,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("RootId");
 
-                    b.ToTable("ImageAnswers", (string)null);
+                    b.ToTable("ImageAnswers");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.ClickImageTrees.ImageAnswerGroup", b =>
@@ -450,7 +450,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("ImageAnswerGroups", (string)null);
+                    b.ToTable("ImageAnswerGroups");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.CourseMapElementImages.CourseMapElementImages", b =>
@@ -500,7 +500,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("CourseMapElementImages", (string)null);
+                    b.ToTable("CourseMapElementImages");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.Course", b =>
@@ -545,7 +545,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMap", b =>
@@ -600,7 +600,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("CourseMap", (string)null);
+                    b.ToTable("CourseMap");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapBadgeSystem", b =>
@@ -633,7 +633,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("MapId");
 
-                    b.ToTable("CourseMapBadgeSystem", (string)null);
+                    b.ToTable("CourseMapBadgeSystem");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapBadgeSystemEntity", b =>
@@ -672,7 +672,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("SystemId");
 
-                    b.ToTable("CourseMapBadgeSystemEntity", (string)null);
+                    b.ToTable("CourseMapBadgeSystemEntity");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapElement", b =>
@@ -708,7 +708,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ExternalVideoLink")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Length")
@@ -724,7 +723,6 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("PDFURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("QuestionSeriesId")
@@ -761,7 +759,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("RequiredElementId");
 
-                    b.ToTable("CourseMapElement", (string)null);
+                    b.ToTable("CourseMapElement");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapElementBadge", b =>
@@ -797,7 +795,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("CourseMapElementBadge", (string)null);
+                    b.ToTable("CourseMapElementBadge");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapKey", b =>
@@ -830,7 +828,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("MapId");
 
-                    b.ToTable("CourseMapKeys", (string)null);
+                    b.ToTable("CourseMapKeys");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.CourseMapPDFStatistics", b =>
@@ -866,7 +864,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("ElementId");
 
-                    b.ToTable("CourseMapPDFStatistics", (string)null);
+                    b.ToTable("CourseMapPDFStatistics");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Courses.MapElementLink", b =>
@@ -901,7 +899,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("MapId");
 
-                    b.ToTable("MapElementLink", (string)null);
+                    b.ToTable("MapElementLink");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.DefaultQuestionImages.DefaultQuestionImage", b =>
@@ -942,7 +940,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("DefaultQuestionImages", (string)null);
+                    b.ToTable("DefaultQuestionImages");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImage", b =>
@@ -1002,7 +1000,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("RightId");
 
-                    b.ToTable("InterpretedImages", (string)null);
+                    b.ToTable("InterpretedImages");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.InterpretedImageGroup", b =>
@@ -1036,7 +1034,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("InterpretedImageGroups", (string)null);
+                    b.ToTable("InterpretedImageGroups");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.JumpValue", b =>
@@ -1064,7 +1062,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("JumpValues", (string)null);
+                    b.ToTable("JumpValues");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.LeftGradientValue", b =>
@@ -1092,7 +1090,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("LeftGradientValues", (string)null);
+                    b.ToTable("LeftGradientValues");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.RationOfGradientsValue", b =>
@@ -1120,7 +1118,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("RationOfGradientsValues", (string)null);
+                    b.ToTable("RationOfGradientsValues");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.InterpretedTrees.RightGradientValue", b =>
@@ -1148,7 +1146,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("RightGradientValues", (string)null);
+                    b.ToTable("RightGradientValues");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.Keyboard", b =>
@@ -1182,7 +1180,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("Keyboards", (string)null);
+                    b.ToTable("Keyboards");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardNumericKey", b =>
@@ -1222,7 +1220,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("KeysListId");
 
-                    b.ToTable("NumericKeys", (string)null);
+                    b.ToTable("NumericKeys");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardNumericKeyRelation", b =>
@@ -1263,7 +1261,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("NumericKeyId");
 
-                    b.ToTable("KeyboardNumericKeyRelation", (string)null);
+                    b.ToTable("KeyboardNumericKeyRelation");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKey", b =>
@@ -1300,7 +1298,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("KeysListId");
 
-                    b.ToTable("VariableKeys", (string)null);
+                    b.ToTable("VariableKeys");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyImageRelation", b =>
@@ -1338,7 +1336,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("VariationId");
 
-                    b.ToTable("KeyboardVariableKeyImageRelation", (string)null);
+                    b.ToTable("KeyboardVariableKeyImageRelation");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyRelation", b =>
@@ -1375,7 +1373,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("VariableKeyId");
 
-                    b.ToTable("KeyboardVariableKeyRelation", (string)null);
+                    b.ToTable("KeyboardVariableKeyRelation");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", b =>
@@ -1408,7 +1406,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("KeyId");
 
-                    b.ToTable("KeyboardVariableKeyVariation", (string)null);
+                    b.ToTable("KeyboardVariableKeyVariation");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeysList", b =>
@@ -1442,7 +1440,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("KeysLists", (string)null);
+                    b.ToTable("KeysLists");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.QuestionInformation.Information", b =>
@@ -1485,7 +1483,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("Information", (string)null);
+                    b.ToTable("Information");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.AbastractKeyboardAnswerElement", b =>
@@ -1532,7 +1530,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("NumericKeyId");
 
-                    b.ToTable("AbastractKeyboardAnswerElements", (string)null);
+                    b.ToTable("AbastractKeyboardAnswerElements");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("AbastractKeyboardAnswerElement");
 
@@ -1565,7 +1563,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("KeyboardQuestionAnswer", (string)null);
+                    b.ToTable("KeyboardQuestionAnswer");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.KeyboardQuestion.KeyboardQuestionWrongAnswer", b =>
@@ -1598,7 +1596,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("KeyboardQuestionWrongAnswers", (string)null);
+                    b.ToTable("KeyboardQuestionWrongAnswers");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.MultipleChoiceQuestion.MultipleChoiceQuestionChoice", b =>
@@ -1636,7 +1634,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("MultipleChoiceQuestionChoice", (string)null);
+                    b.ToTable("MultipleChoiceQuestionChoice");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionBase", b =>
@@ -1717,7 +1715,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("SubtopicId");
 
-                    b.ToTable("QuestionBase", (string)null);
+                    b.ToTable("QuestionBase");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("QuestionBase");
 
@@ -1760,7 +1758,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("QuestionComments", (string)null);
+                    b.ToTable("QuestionComments");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSection", b =>
@@ -1790,7 +1788,7 @@ namespace heatquizappapi.Migrations
                     b.HasIndex("QuestionId")
                         .IsUnique();
 
-                    b.ToTable("QuestionCommentSection", (string)null);
+                    b.ToTable("QuestionCommentSection");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentSectionTag", b =>
@@ -1828,7 +1826,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("QuestionCommentSectionTags", (string)null);
+                    b.ToTable("QuestionCommentSectionTags");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.QuestionCommentTag", b =>
@@ -1863,7 +1861,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("QuestionCommentTags", (string)null);
+                    b.ToTable("QuestionCommentTags");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickChart", b =>
@@ -1909,7 +1907,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("ClickChart", (string)null);
+                    b.ToTable("ClickChart");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.SimpleClickableQuestion.ClickImage", b =>
@@ -1955,7 +1953,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("ClickImage", (string)null);
+                    b.ToTable("ClickImage");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Series.QuestionSeries", b =>
@@ -1998,7 +1996,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("QuestionSeries", (string)null);
+                    b.ToTable("QuestionSeries");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Series.QuestionSeriesElement", b =>
@@ -2038,7 +2036,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("QuestionSeriesElement", (string)null);
+                    b.ToTable("QuestionSeriesElement");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Series.QuestionSeriesStatistic", b =>
@@ -2059,15 +2057,12 @@ namespace heatquizappapi.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("MapElementName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MapKey")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MapName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("OnMobile")
@@ -2093,7 +2088,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("QuestionSeriesStatistic", (string)null);
+                    b.ToTable("QuestionSeriesStatistic");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.StatisticsAndStudentFeedback.QuestionPDFStatistic", b =>
@@ -2129,7 +2124,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionPDFStatistic", (string)null);
+                    b.ToTable("QuestionPDFStatistic");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.StatisticsAndStudentFeedback.QuestionStatistic", b =>
@@ -2175,7 +2170,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionStatistic", (string)null);
+                    b.ToTable("QuestionStatistic");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.StatisticsAndStudentFeedback.QuestionStudentFeedback", b =>
@@ -2212,7 +2207,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("QuestionStudentFeedback", (string)null);
+                    b.ToTable("QuestionStudentFeedback");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Topics.Subtopic", b =>
@@ -2245,7 +2240,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("Subtopics", (string)null);
+                    b.ToTable("Subtopics");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Topics.Topic", b =>
@@ -2279,7 +2274,7 @@ namespace heatquizappapi.Migrations
 
                     b.HasIndex("DataPoolId");
 
-                    b.ToTable("Topics", (string)null);
+                    b.ToTable("Topics");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Questions.KeyboardQuestion.KeyboardQuestionAnswerElement", b =>
@@ -3021,7 +3016,7 @@ namespace heatquizappapi.Migrations
                         .IsRequired();
 
                     b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyImageRelation", "Image")
-                        .WithMany()
+                        .WithMany("AnswerElements")
                         .HasForeignKey("ImageId");
 
                     b.HasOne("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", null)
@@ -3565,6 +3560,11 @@ namespace heatquizappapi.Migrations
                     b.Navigation("Relations");
 
                     b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyImageRelation", b =>
+                {
+                    b.Navigation("AnswerElements");
                 });
 
             modelBuilder.Entity("heatquizapp_api.Models.Keyboard.KeyboardVariableKeyVariation", b =>

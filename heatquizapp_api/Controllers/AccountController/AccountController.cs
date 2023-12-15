@@ -68,15 +68,21 @@ namespace heatquizapp_api.Controllers.AccountController
         {
             var currentUser = await getCurrentUser(_contextAccessor, _userManager);
 
-            var users = await _applicationDbContext.Users.ToListAsync();
+            var users = await _applicationDbContext.Users
+                .ToListAsync();
 
-            return Ok(users.Select(user => new {
+            var linkedKeys = await _applicationDbContext.UserLinkedPlayerKeys.Where(a => a.UserId == currentUser.Id).Select(a => a.PlayerKey).ToListAsync();
+
+            var data = users.Select(user => new
+            {
                 Name = user.Name,
                 RegisteredOn = user.RegisteredOn.ToString("d", new CultureInfo("de-De")),
                 Email = user.Email,
-                PlayerKeys = new List<string>(),
-                ProfilePicture = string.Empty,
-            }));
+                PlayerKeys = user.Id == currentUser.Id ? linkedKeys : new List<string>(),
+                ProfilePicture = MappingProfile.GetUserProfilePictureURL(user),
+            });
+
+            return Ok(data);
         }
 
         [HttpGet("[action]")]
@@ -158,15 +164,17 @@ namespace heatquizapp_api.Controllers.AccountController
                 return BadRequest("Please provide a name and an email");
 
             //Check user exists
+            var currentUser = await getCurrentUser(_contextAccessor, _userManager);
+
             var User = await _applicationDbContext.Users
-                .FirstOrDefaultAsync(u => u.UserName == VM.Username);
+                .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
             if (User is null)
                 return NotFound("User not found");
 
             //Check Name Taken
             var nameTaken = await _applicationDbContext.Users
-                .AnyAsync(u => u.Name.ToUpper() == VM.Name.ToUpper() && u.UserName.ToUpper() != VM.Username.ToUpper());
+                .AnyAsync(u => u.Name.ToUpper() == VM.Name.ToUpper() && u.Id != currentUser.Id);
 
             if (nameTaken)
                 return BadRequest("Name alraedy taken");
@@ -181,7 +189,6 @@ namespace heatquizapp_api.Controllers.AccountController
 
      
         [HttpPut("[action]")]
-        //Remove Username from website change type 
         public async Task<IActionResult> UpdateProfilePicture(IFormFile Picture)
         {
             var currentUser = await getCurrentUser(_contextAccessor, _userManager);
@@ -202,6 +209,9 @@ namespace heatquizapp_api.Controllers.AccountController
             if (!isExtensionValid)
                 return BadRequest("Picture extenstion not valid");
 
+            //Remove existing image
+            if(User.ProfilePicture != null)
+                RemoveFile(User.ProfilePicture);
 
             //Save image and get url
              var URL = await SaveFile(Picture);
@@ -215,7 +225,6 @@ namespace heatquizapp_api.Controllers.AccountController
 
 
         [HttpPut("[action]")]
-        //Remove Username from website change type 
         public async Task<IActionResult> RemoveProfilePicture()
         {
             var currentUser = await getCurrentUser(_contextAccessor, _userManager);
@@ -225,6 +234,9 @@ namespace heatquizapp_api.Controllers.AccountController
 
             var User = await _applicationDbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+            if (User.ProfilePicture != null)
+                RemoveFile(User.ProfilePicture);
 
             User.ProfilePicture = null;
 

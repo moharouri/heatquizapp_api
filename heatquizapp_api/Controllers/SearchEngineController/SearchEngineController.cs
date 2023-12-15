@@ -339,6 +339,7 @@ namespace heatquizapp_api.Controllers.SearchEngineController
 
                 .Include(s => s.Elements)
                 .Include(s => s.AddedBy)
+
                 .Include(s => s.MapElements)
                 .ThenInclude(me => me.Map)
                 

@@ -167,6 +167,30 @@ namespace heatquizapp_api.Controllers.QuestionSeriesController
             return Ok(_mapper.Map<QuestionSeries, QuestionSeriesViewModel>(Series));
         }
 
+        [HttpPut("[action]")]
+        public async Task<IActionResult> RemoveSeries([FromBody] UniversalAccessByIdViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var series = await _applicationDbContext.QuestionSeries
+                .Include(a => a.Elements)
+                .Include(a => a.Statistics)
+
+                .Include(a => a.MapElements)
+                .FirstOrDefaultAsync(a => a.Id == VM.Id);
+
+            if (series is null)
+                return BadRequest("Series not found");
+
+            _applicationDbContext.QuestionSeries.Remove(series);
+
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
         [HttpPost("[action]")]
         public async Task<IActionResult> AddSeriesElements([FromBody] ReorderAssignDeselectQuestionSeriesElementsViewModel VM)
         {

@@ -292,8 +292,7 @@ namespace heatquizapp_api.Controllers.CourseMapElementImagesController
         }
 
         [HttpPut("[action]")]
-        //Change type in vs code and request method !!!!
-        public async Task<IActionResult> DeassignImagesList([FromBody] CourseMapElementViewModel VM)
+        public async Task<IActionResult> DeassignImagesList([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);

@@ -25,14 +25,14 @@ namespace heatquizapp_api.Models.Courses
         public int BadgeLength { get; set; }
 
         //Link
-        public string ExternalVideoLink { get; set; }
+        public string? ExternalVideoLink { get; set; }
 
         //Map attachment
         public MapElementLink MapAttachment { get; set; }
         public int? MapAttachmentId { get; set; }
 
         //PDF
-        public string PDFURL { get; set; }
+        public string? PDFURL { get; set; }
         public long PDFSize { get; set; }
 
         //PDF click statistics

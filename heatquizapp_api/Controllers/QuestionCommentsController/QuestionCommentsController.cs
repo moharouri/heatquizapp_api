@@ -188,7 +188,7 @@ namespace heatquizapp_api.Controllers.QuestionCommentsController
                 .Where(a => a.UserId == user.Id)
                 .ToListAsync();
 
-            var notificationsDates = notificationSubscribtions.ToDictionary(a => a.Id);
+            var notificationsDates = notificationSubscribtions.ToDictionary(a => a.DatapoolId);
             var notificationsDPIds = notificationSubscribtions.Select(a => a.DatapoolId).ToList();
 
             var StudentFeedback = await _applicationDbContext.QuestionStudentFeedback

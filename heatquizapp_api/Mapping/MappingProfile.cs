@@ -198,7 +198,12 @@ namespace HeatQuizAPI.Mapping
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));
 
             CreateMap<CourseMapElement, CourseMapElementViewModel>()
-                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt));
+                .ForMember(vm => vm.PDFURL, opt => mapPDF(opt))
+                .ForMember(vm => vm.QuestionSeries, opt => opt.MapFrom(a => a.QuestionSeries))
+                .ForMember(vm => vm.MapAttachment, opt => opt.MapFrom(a => a.MapAttachment))
+                .ForMember(vm => vm.CourseMapElementImages, opt => opt.MapFrom(a => a.CourseMapElementImages));
+
+            CreateMap<MapElementLink, MapElementLinkViewModel>();
 
             CreateMap<CourseMapElementBadge, CourseMapElementBadgeViewModel>()
                 .ForMember(vm => vm.ImageURL, opt => mapImage(opt));

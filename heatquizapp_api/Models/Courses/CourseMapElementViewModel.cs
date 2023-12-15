@@ -7,6 +7,8 @@ namespace heatquizapp_api.Models.Courses
     {
         public int MapId { get; set; }
 
+        public CourseMapViewModel Map { get; set; }
+
         public string Title { get; set; }
 
         public int X { get; set; }
@@ -23,7 +25,7 @@ namespace heatquizapp_api.Models.Courses
         public int BadgeLength { get; set; }
 
         //Link
-        public string ExternalVideoLink { get; set; }
+        public string? ExternalVideoLink { get; set; }
 
         //Map attachment
         public MapElementLinkViewModel MapAttachment { get; set; }
@@ -34,7 +36,7 @@ namespace heatquizapp_api.Models.Courses
         public long PDFSize { get; set; }
 
         //Series
-        public QuestionSeriesViewModel QuestionSeries { get; set; }
+        public QuestionSeriesViewModel QuestionSeries { get; set; } 
         public int? QuestionSeriesId { get; set; }
 
         //Required element

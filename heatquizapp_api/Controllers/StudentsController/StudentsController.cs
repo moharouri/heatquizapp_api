@@ -185,9 +185,12 @@ namespace heatquizapp_api.Controllers.StudentsController
 
                 .Include(c => c.Elements)
                 .ThenInclude(e => e.QuestionSeries)
-                
+                .ThenInclude(s => s.Elements)
+
                 .Include(c => c.Elements)
                 .ThenInclude(e => e.RequiredElement)
+                .ThenInclude(e => e.QuestionSeries)
+                .ThenInclude(s => s.Elements)
 
                 .Include(c => c.Elements)
                 .ThenInclude(e => e.Badges)
@@ -374,9 +377,35 @@ namespace heatquizapp_api.Controllers.StudentsController
         }
 
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetRecentlyVisitedCourseMapsByIds([FromBody] GetMapsByIdsViewModel VM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Constants.HTTP_REQUEST_INVALID_DATA);
+
+            var Maps = await _applicationDbContext.CourseMap
+                .Where(c => VM.Ids.Any(a => a == c.Id))
+                .ToListAsync();
+
+            var MapsOrdered = new List<CourseMap>();
+
+            foreach (var Id in VM.Ids)
+            {
+                var map = Maps.FirstOrDefault(a => a.Id == Id);
+
+                if (map != null)
+                {
+                    MapsOrdered.Add(map);
+                }
+            }
+
+            MapsOrdered.Reverse();
+
+            return Ok(_mapper.Map<List<CourseMapViewModel>>(MapsOrdered));
+        }
+
 
         [HttpPost("[action]")]
-        //Change name and position controller-wise -- original: AddPDFStatistic
         public async Task<IActionResult> AddMapPDFStatistic([FromForm] AddMapPDFStatisticViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -391,7 +420,9 @@ namespace heatquizapp_api.Controllers.StudentsController
             element.PDFStatistics.Add(new CourseMapPDFStatistics()
             {
                 Player = VM.Player,
-                OnMobile = VM.OnMobile
+                OnMobile = VM.OnMobile,
+
+                DataPoolId = element.DataPoolId
             });
 
             await _applicationDbContext.SaveChangesAsync();

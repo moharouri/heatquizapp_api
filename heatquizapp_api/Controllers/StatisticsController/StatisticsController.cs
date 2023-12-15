@@ -352,7 +352,6 @@ namespace heatquizapp_api.Controllers.StatisticsController
         }
 
         [HttpPost("[action]")]
-        //change type, name and position original: GetCourseMapStatisticsById_PORTAL
         public async Task<IActionResult> GetCourseMapStatisticsById([FromBody] UniversalAccessByIdViewModel VM)
         {
             if (!ModelState.IsValid)
@@ -369,11 +368,9 @@ namespace heatquizapp_api.Controllers.StatisticsController
                         PDFStatisticsCountOnMobile = e.PDFStatistics.Count(s => s.OnMobile),
 
                         SeriesPlayCount = e.QuestionSeries != null ? e.QuestionSeries.Statistics.Count : 0,
-                        SeriesPlayCountOnMobile = e.QuestionSeries != null ?
-                         e.QuestionSeries.Statistics.Count(s => s.OnMobile) : 0,
+                        SeriesPlayCountOnMobile = e.QuestionSeries != null ? e.QuestionSeries.Statistics.Count(s => s.OnMobile) : 0,
 
-                        SeriesPlayMedianTime = e.QuestionSeries != null ?
-                        e.QuestionSeries.Statistics.OrderBy(a => a.TotalTime).Skip(e.QuestionSeries.Statistics.Count() / 2).FirstOrDefault().TotalTime : 0,
+                        SeriesPlayMedianTime = e.QuestionSeries != null && e.QuestionSeries.Statistics.Any() ? e.QuestionSeries.Statistics.OrderBy(a => a.TotalTime).ToList()[(int)(e.QuestionSeries.Statistics.Count() / 2)].TotalTime : 0
                     }).ToList()
                 })
                .FirstOrDefaultAsync(c => c.Id == VM.Id);
