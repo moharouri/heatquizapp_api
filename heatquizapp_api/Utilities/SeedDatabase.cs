@@ -1,6 +1,7 @@
 ﻿using HeatQuizAPI.Database;
 using HeatQuizAPI.Models.BaseModels;
 using HeatQuizAPI.Models.LevelsOfDifficulty;
+using heatquizapp_api.Models.BaseModels;
 using Microsoft.AspNetCore.Identity;
 
 namespace HeatQuizAPI.Services
@@ -91,6 +92,7 @@ namespace HeatQuizAPI.Services
                 _userManager.CreateAsync(HQUser, _hquserPassword).Wait();
                 _userManager.AddToRoleAsync(HQUser, roles[1].ToLower()).Wait();
             }
+
         }
 
         //Function to seed datapools
@@ -142,6 +144,58 @@ namespace HeatQuizAPI.Services
             }
 
             _context.SaveChangesAsync().Wait();
+
+            var LeftValues = new List<string>() { "+", "-", "Zero"};
+
+            foreach(var leftValue in LeftValues)
+            {
+                _context.LeftGradientValues.Add(new heatquizapp_api.Models.InterpretedTrees.LeftGradientValue()
+                {
+                    DataPoolId = 1,
+                    Value = leftValue,
+                });
+
+                _context.SaveChanges();
+            }
+
+            var RightValues = new List<string>() { "+", "-", "Zero" };
+
+            foreach (var leftValue in RightValues)
+            {
+                _context.RightGradientValues.Add(new heatquizapp_api.Models.InterpretedTrees.RightGradientValue()
+                {
+                    DataPoolId = 1,
+                    Value = leftValue,
+                });
+
+                _context.SaveChanges();
+            }
+
+            var JumpValues = new List<string>() { ">", "NO JUMP", "<" };
+
+            foreach (var leftValue in JumpValues)
+            {
+                _context.JumpValues.Add(new heatquizapp_api.Models.InterpretedTrees.JumpValue()
+                {
+                    DataPoolId = 1,
+                    Value = leftValue,
+                });
+
+                _context.SaveChanges();
+            }
+
+            var RatioValies = new List<string>() { ">", "=", "<" };
+
+            foreach (var leftValue in RatioValies)
+            {
+                _context.RationOfGradientsValues.Add(new heatquizapp_api.Models.InterpretedTrees.RationOfGradientsValue()
+                {
+                    DataPoolId = 1,
+                    Value = leftValue,
+                });
+
+                _context.SaveChanges();
+            }
         }
     }
 
