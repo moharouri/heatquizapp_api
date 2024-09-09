@@ -19,6 +19,10 @@ namespace heatquizapp_api.Models.Courses
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
 
+        public string LargeMapURL { get; set; }
+        public int LargeMapWidth { get; set; }
+        public int LargeMapLength { get; set; }
+
         public List<CourseMapElementViewModel> Elements { get; set; } = new List<CourseMapElementViewModel>();
 
         public List<CourseMapBadgeSystemViewModel> BadgeSystems { get; set; } = new List<CourseMapBadgeSystemViewModel>();

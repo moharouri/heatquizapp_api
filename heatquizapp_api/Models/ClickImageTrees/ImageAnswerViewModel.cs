@@ -9,19 +9,15 @@ namespace heatquizapp_api.Models.ClickImageTrees
 
         //Image
         public string ImageURL { get; set; }
+        public string URL { get; set; }
         public long Size { get; set; }
 
         //Group 
         public ImageAnswerGroupViewModel Group { get; set; }
         public int GroupId { get; set; }
 
-        //Root 
-        public ImageAnswerViewModel Root { get; set; }
-        public int? RootId { get; set; }
-
         //Leafs
         public List<ImageAnswerViewModel> Leafs { get; set; } = new List<ImageAnswerViewModel>();
 
-        public List<ClickImageViewModel> ClickImages { get; set; } = new List<ClickImageViewModel>();
     }
 }

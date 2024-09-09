@@ -24,6 +24,12 @@ namespace heatquizapp_api.Models.Courses
         public int BadgeWidth { get; set; }
         public int BadgeLength { get; set; }
 
+        public int Badge_X { get; set; }
+        public int Badge_Y { get; set; }
+
+        public int Badge_Width { get; set; }
+        public int Badge_Length { get; set; }
+
         //Link
         public string? ExternalVideoLink { get; set; }
 

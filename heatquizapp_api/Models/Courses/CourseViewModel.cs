@@ -11,8 +11,10 @@ namespace heatquizapp_api.Models.Courses
 
         //Thumbnail
         public string ImageURL { get; set; }
+        public string URL { get; set; }
 
         public long ImageSize { get; set; }
+        public long Size { get; set; }
 
         public string AddedByName { get; set; }
 

@@ -100,8 +100,8 @@ using (var scope = scopedFactory.CreateScope())
     var service = scope.ServiceProvider.GetService<ISeedDatabase>();
     
     service.SeedRolesAndFirstUsers();
-    service.SeedLevelsOfDifficulty();
     service.SeedDatapools();
+    service.SeedLevelsOfDifficulty();
 
 }*/
 
